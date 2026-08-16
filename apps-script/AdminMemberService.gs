@@ -200,7 +200,7 @@ function serializeMember_(member, timezone, attendance, card) {
     memberId: normalizeMemberId_(member.MemberID), firstName: String(member.FirstName || ""), lastName: String(member.LastName || ""),
     status: String(member.Status || ""), category: String(member.Category || ""), joinedAt: adminDateText_(member.JoinedAt, timezone),
     notes: String(member.Notes || ""), lastAttendance: attendance ? adminInstantText_(attendance.Timestamp, timezone) : "",
-    card: { status: card && card.CardURL ? "generated" : card && card.LastError ? "failed" : "missing", url: card ? String(card.CardURL || "") : "", generatedAt: card ? adminInstantText_(card.GeneratedAt, timezone) : "" },
+    card: serializeAdminCard_(card, timezone),
   };
 }
 

@@ -23,13 +23,14 @@ Current files:
 - `AdminScheduleService.gs`: schedule and training-type management with overlap validation
 - `AdminSettingsService.gs`: validated settings, public scanner config, messages, and card-readiness checks
 - `Admin.html`, `Admin.js.html`, `Admin.css.html`: authenticated responsive owner interface
+- `CardService.gs`: configurable Slides copy/text/QR generation plus single and batch workflows
+- `CardRepository.gs`: atomic `_Card_State` and `Members.CardURL` persistence
 - `appsscript.json`: neutral V8 manifest with UTC default
 
 The public route accepts `api=checkin&id=<member-id>`. A simple callback identifier may be supplied for JSONP; unsafe callback values are rejected and never reflected. See `docs/API_CONTRACT.md` for the frozen response fields.
 
 Runtime features remaining for later phases:
 
-- Phase 6: member ID and QR card workflow
 - Phase 7: attendance views and reports
 
 GitHub remains the source of truth. Do not bind this source to AXIS or a live client project, run `clasp push`, or deploy it. Testing against a new development Sheet requires an explicit target confirmation and the checks in `DEPLOYMENT.md` and `docs/SHEETS_SCHEMA.md`.
@@ -39,3 +40,5 @@ Local contract coverage is in `tests/phase4-checkin.test.js`. It does not replac
 Phase 5 authentication and UI setup are documented in `docs/ADMIN_SETUP.md`. The admin route renders a sign-in shell publicly, but no operational data or mutation is available until `adminApi` verifies the token and allowlisted email on the server. Implementation handlers end in `_` and cannot be called directly through `google.script.run`.
 
 Apps Script treats trailing-underscore functions as private to server-side code. The scanner implementation, setup routine, and demo loader therefore use `checkIn_`, `setupTemplate_`, and `loadDemoData_`. Maintainers can run the latter two from the Apps Script editor, while browser clients cannot invoke them with `google.script.run`.
+
+Phase 6 uses the protected settings and neutral template contract in `docs/CARD_TEMPLATE.md`. No Slides template, Drive folder, generated card, or deployment binding is committed to this repository.

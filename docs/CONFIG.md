@@ -57,6 +57,7 @@ Protected values are loaded by the backend from owner-readable settings where ap
 - Member ID prefix/width and internal next-number state
 - Message targeting configuration
 - Spreadsheet, Drive folder, Slides template, Apps Script project, and deployment identifiers
+- Slides placeholder tokens, QR value/filename formats, and the approved QR image endpoint
 - Admin authorization allowlist and all credentials/tokens
 - Client-specific deployment and hosting metadata
 
@@ -287,3 +288,5 @@ This second configuration uses the same keys and types while changing identity, 
 ```
 
 Neither sample depends on an AXIS name, URL, asset, member prefix, training type, or deployment identifier.
+
+The implementation's protected card settings extend `protected.cards` with configurable placeholder tokens, `qrValueFormat`, `fileNameFormat`, and `qrImageEndpoint`. See `CARD_TEMPLATE.md` for the exact supported tokens and neutral defaults. These settings never enter public scanner configuration.

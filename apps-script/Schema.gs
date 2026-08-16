@@ -132,6 +132,16 @@ var TEMPLATE_DEFAULT_SETTINGS = Object.freeze([
   ["ScannerURL", "", "Public scanner URL"],
   ["CardTemplateID", "", "Protected Slides card template ID"],
   ["CardOutputFolderID", "", "Protected Drive card output folder ID"],
+  ["CardGymNamePlaceholder", "{{GYM_NAME}}", "Slides placeholder for gym name"],
+  ["CardFirstNamePlaceholder", "{{FIRST_NAME}}", "Slides placeholder for first name"],
+  ["CardLastNamePlaceholder", "{{LAST_NAME}}", "Slides placeholder for last name"],
+  ["CardMemberIdPlaceholder", "{{MEMBER_ID}}", "Slides placeholder for member ID"],
+  ["CardQrPlaceholder", "{{QR_CODE}}", "Dedicated Slides text-box placeholder for QR image"],
+  ["CardMembershipPlaceholder", "{{MEMBERSHIP}}", "Optional Slides placeholder for membership status"],
+  ["CardCategoryPlaceholder", "{{CATEGORY}}", "Optional Slides placeholder for member category"],
+  ["CardQrValueFormat", "{memberId}", "QR value tokens: memberId, firstName, lastName, category, membership, gymName, scannerUrl"],
+  ["CardFileNameFormat", "{memberId}-{firstName}-{lastName}", "Generated Slides filename format"],
+  ["CardQrImageEndpoint", "https://quickchart.io/qr?size=600&text={value}", "HTTPS QR image endpoint with encoded {value} token"],
 ]);
 
 var ATTENDANCE_PROJECTION_FORMULA = "=ARRAYFORMULA(IF('_Raw_Attendance'!B2:B=\"\",\"\",{'_Raw_Attendance'!B2:B,'_Raw_Attendance'!C2:C,'_Raw_Attendance'!D2:D,'_Raw_Attendance'!E2:E,'_Raw_Attendance'!H2:H,'_Raw_Attendance'!I2:I,'_Raw_Attendance'!J2:J}))";

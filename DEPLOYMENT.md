@@ -22,6 +22,8 @@ Do not place real client IDs, credentials, member data, or live URLs in example 
 
 Phase 5 admin testing additionally requires a new development Sheet, spreadsheet-bound Apps Script project, OAuth web client, and protected script properties. The exact resource and manual-test checklist is in `docs/ADMIN_SETUP.md`. Create and confirm those resources before any `clasp push`; never reuse AXIS or client-production identifiers for template testing.
 
+Phase 6 card testing also requires a neutral development Slides template and Drive output folder shared with the web-app execution account. Configure their IDs only in the protected development settings and follow `docs/CARD_TEMPLATE.md`. Creating those resources still does not authorize `clasp push` or deployment.
+
 ## Frontend changes
 
 The frontend consists of the root-level scanner and PWA files. After reviewing and testing a change:

@@ -7,6 +7,8 @@ var ADMIN_SETTING_KEYS = Object.freeze([
   "ScannerReadyTitle", "ScannerReadyInstruction", "ScannerLoadingTitle", "ScannerLoadingInstruction", "ScannerInvalidInstruction", "ScannerErrorInstruction",
   "ScannerTimeoutTitle", "ScannerTimeoutInstruction", "ScannerCameraStartingText", "ScannerCameraActiveText", "ScannerCameraErrorInstruction", "ScannerSoundHint", "ScannerRetryButton",
   "PreferredCamera", "ScannerSound", "ScannerVibration", "ScannerURL", "CardTemplateID", "CardOutputFolderID",
+  "CardGymNamePlaceholder", "CardFirstNamePlaceholder", "CardLastNamePlaceholder", "CardMemberIdPlaceholder", "CardQrPlaceholder",
+  "CardMembershipPlaceholder", "CardCategoryPlaceholder", "CardQrValueFormat", "CardFileNameFormat", "CardQrImageEndpoint",
 ]);
 
 function getAdminSettings_() {
@@ -61,11 +63,17 @@ function updateAdminSettings_(data) {
 }
 
 function testCardConfiguration_() {
-  var settings = getAdminSettings_();
-  var missing = [];
-  if (!settings.CardTemplateID) missing.push("Card template ID");
-  if (!settings.CardOutputFolderID) missing.push("Card output folder ID");
-  return { ready: missing.length === 0, missing: missing, message: missing.length ? "Card generation is not configured yet." : "Card configuration values are present; generation arrives in Phase 6." };
+  var config = getCardConfiguration_();
+  var template = DriveApp.getFileById(config.templateId);
+  var folder = DriveApp.getFolderById(config.outputFolderId);
+  var presentation = SlidesApp.openById(config.templateId);
+  var qrFound = presentation.getSlides().some(function (slide) {
+    return slide.getPageElements().some(function (element) {
+      return element.getPageElementType() === SlidesApp.PageElementType.SHAPE && element.asShape().getText().asString().trim() === config.qrPlaceholder;
+    });
+  });
+  if (!qrFound) throw adminError_("card_template_invalid", "The dedicated QR placeholder shape was not found.");
+  return { ready: true, missing: [], templateName: template.getName(), outputFolderName: folder.getName(), message: "Card template and output folder are accessible." };
 }
 
 function listBasicMessages_() {
@@ -130,6 +138,9 @@ function validateAdminSetting_(key, value) {
   if (key === "ScannerSound" || key === "ScannerVibration") return String(adminBoolean_(value, false));
   if ((key === "LogoURL" || key === "IconURL" || key === "ScannerURL") && text && !/^(https:\/\/|\.\.\/|\.\/|\/)/.test(text)) throw adminError_("validation_error", "Use an HTTPS URL or relative public path.", makeAdminFieldError_(key));
   if ((key === "CardTemplateID" || key === "CardOutputFolderID") && text && !/^[A-Za-z0-9_-]{10,200}$/.test(text)) throw adminError_("validation_error", "Use a valid Google file or folder ID.", makeAdminFieldError_(key));
+  if (/^Card.*Placeholder$/.test(key) && text.length > 80) throw adminError_("validation_error", "Card placeholders must be 80 characters or fewer.", makeAdminFieldError_(key));
+  if ((key === "CardQrValueFormat" || key === "CardFileNameFormat") && text) validateCardFormat_(text, key === "CardQrValueFormat");
+  if (key === "CardQrImageEndpoint" && text && (!/^https:\/\//.test(text) || text.indexOf("{value}") === -1)) throw adminError_("validation_error", "Use an HTTPS QR endpoint containing {value}.", makeAdminFieldError_(key));
   return text;
 }
 

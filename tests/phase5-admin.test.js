@@ -45,7 +45,7 @@ const claimsByToken = {
   outsider: { iss: "https://accounts.google.com", aud: properties.ADMIN_GOOGLE_CLIENT_ID, email: "other@example.invalid", email_verified: true, exp: Math.floor(Date.now() / 1000) + 3600 },
   wrongAudience: { iss: "https://accounts.google.com", aud: "wrong-client", email: "owner@example.invalid", email_verified: true, exp: Math.floor(Date.now() / 1000) + 3600 },
 };
-const actionNames = ["getDashboardData_", "listMembers_", "getMember_", "getMemberAttendance_", "getMemberFormOptions_", "createMember_", "updateMember_", "setMemberStatus_", "listSchedule_", "createScheduleEntry_", "updateScheduleEntry_", "setScheduleStatus_", "deleteScheduleEntry_", "saveScheduleOrder_", "createTrainingType_", "updateTrainingType_", "deleteTrainingType_", "getAdminSettings_", "updateAdminSettings_", "testCardConfiguration_", "listBasicMessages_", "saveBasicMessage_", "deleteBasicMessage_"];
+const actionNames = ["getDashboardData_", "listMembers_", "getMember_", "getMemberAttendance_", "getMemberFormOptions_", "createMember_", "updateMember_", "setMemberStatus_", "listSchedule_", "createScheduleEntry_", "updateScheduleEntry_", "setScheduleStatus_", "deleteScheduleEntry_", "saveScheduleOrder_", "createTrainingType_", "updateTrainingType_", "deleteTrainingType_", "getAdminSettings_", "updateAdminSettings_", "testCardConfiguration_", "listBasicMessages_", "saveBasicMessage_", "deleteBasicMessage_", "listMemberCards_", "generateMemberCard_", "regenerateMemberCard_", "generateMissingMemberCards_"];
 const context = {
   Object,
   Array,

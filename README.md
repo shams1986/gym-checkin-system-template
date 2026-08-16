@@ -28,6 +28,7 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- API_CONTRACT.md        Frozen Phase 1 scanner state/payload contract
 |   |-- CONFIG.md              Configuration model and security boundary
 |   |-- ADMIN_SETUP.md         Admin authentication and acceptance setup
+|   |-- CARD_TEMPLATE.md       Neutral Slides card template contract
 |   `-- SHEETS_SCHEMA.md       Phase 2 workbook and setup contract
 |-- scanner/
 |   |-- index.html             Tablet scanner/PWA shell
@@ -58,6 +59,8 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- Admin.html             Owner application shell
 |   |-- Admin.js.html          Navigation, forms, and interface states
 |   |-- Admin.css.html         Responsive owner interface styles
+|   |-- CardService.gs         Slides/Drive card generation and batches
+|   |-- CardRepository.gs      Card state and member-link persistence
 |   `-- appsscript.json        Neutral V8 manifest
 `-- tests/
     |-- phase2-schema.test.js  Local Phase 2 contract checks
@@ -78,7 +81,9 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 5 — owner/admin panel MVP:** implemented in source with Google-token authorization, an explicit action allowlist, Dashboard, Members, Add/Edit Member, Member Detail, Schedule, Settings, and basic-message workflows. Live identity and Apps Script acceptance checks require the disposable resources documented in `docs/ADMIN_SETUP.md`.
 
-No card generator or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
+**Phase 6 — member card workflow:** implemented in source with configurable Google Slides placeholders, Drive output, QR formats, single/regenerate/confirmed batch actions, fault-isolated card state, and admin card status/actions. Live Slides/Drive acceptance checks require the disposable resources documented in `docs/CARD_TEMPLATE.md`.
+
+No reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
 
 ## Working rules
 

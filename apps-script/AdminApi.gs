@@ -22,6 +22,10 @@ var ADMIN_ACTIONS = Object.freeze({
   listBasicMessages: listBasicMessages_,
   saveBasicMessage: saveBasicMessage_,
   deleteBasicMessage: deleteBasicMessage_,
+  listMemberCards: listMemberCards_,
+  generateMemberCard: generateMemberCard_,
+  regenerateMemberCard: regenerateMemberCard_,
+  generateMissingMemberCards: generateMissingMemberCards_,
 });
 
 function adminApi(action, payload, identityToken) {
