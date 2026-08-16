@@ -29,7 +29,15 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- CONFIG.md              Configuration model and security boundary
 |   `-- SHEETS_SCHEMA.md       Phase 2 workbook and setup contract
 |-- scanner/
-|   `-- config.example.js      Safe public configuration example only
+|   |-- index.html             Tablet scanner/PWA shell
+|   |-- styles.css             Responsive scanner and result layouts
+|   |-- app.js                 Camera, rendering, feedback, and reset flow
+|   |-- core.mjs               Config, QR, state, and JSONP lifecycle logic
+|   |-- config.js              Neutral runnable public configuration
+|   |-- config.example.js      Safe public configuration example
+|   |-- manifest.json          Neutral PWA metadata
+|   |-- service-worker.js      Network-first shell cache
+|   `-- assets/                Neutral template logo and icon
 |-- apps-script/
 |   |-- README.md              Backend source orientation
 |   |-- Schema.gs              Exact sheet/header/config contracts
@@ -48,7 +56,9 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 2 — Google Sheets schema and setup functions:** implemented in source with exact headers, validation rules, hidden/protected internal sheets, schema metadata, a protected attendance projection, and separate demo data. Completion requires local checks, Reviewer approval, and the manual workbook checks documented in `docs/SHEETS_SCHEMA.md` when an approved disposable development Sheet is available.
 
-No scanner, check-in API, admin UI, card generator, or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
+**Phase 3 — reusable scanner:** implemented with public configuration fallback, generalized QR parsing, all nine contract states, JSONP cleanup/timeout, feedback, responsive tablet layouts, PWA files, and fixtures. Completion requires automated/browser checks and Reviewer approval; camera/device/PWA installation checks remain manual.
+
+No check-in backend API, admin UI, card generator, or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
 
 ## Working rules
 

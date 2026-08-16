@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Gym check-in template icon</title>
+  <rect width="512" height="512" rx="112" fill="#07161C"/>
+  <rect x="72" y="72" width="368" height="368" rx="84" fill="#174A5B"/>
+  <path d="M150 256c0-75 47-134 116-134 43 0 80 21 100 56l-57 34c-9-18-24-29-43-29-33 0-53 30-53 73 0 44 21 75 56 75 17 0 32-6 43-16v-28h-48v-55h109v113c-29 31-67 47-111 47-67 0-112-59-112-136Z" fill="#F2B84B"/>
+</svg>

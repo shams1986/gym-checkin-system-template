@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-labelledby="title desc">
+  <title id="title">Demo Gym</title>
+  <desc id="desc">Neutral placeholder logo for the gym check-in template</desc>
+  <rect width="120" height="120" rx="28" fill="#174A5B"/>
+  <path d="M31 60c0-19 12-34 29-34 11 0 20 5 25 14l-14 8c-2-4-6-7-11-7-8 0-13 8-13 19s5 19 14 19c4 0 8-1 11-4v-7H60V55h28v28c-7 8-17 12-28 12-17 0-29-15-29-35Z" fill="#F2B84B"/>
+  <text x="146" y="57" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="36" font-weight="700">DEMO GYM</text>
+  <text x="147" y="86" fill="#B9C9CE" font-family="Arial, sans-serif" font-size="18" letter-spacing="5">CHECK-IN</text>
+</svg>

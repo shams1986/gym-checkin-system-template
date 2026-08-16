@@ -1,24 +1,18 @@
-/**
- * Safe public scanner configuration example.
- *
- * Copy this shape for a gym-specific public config. Do not add schedules,
- * member data, admin identities, storage IDs, credentials, or secrets here.
- */
 window.GYM_PUBLIC_CONFIG = Object.freeze({
   schemaVersion: 1,
   identity: {
-    name: "Harbor Strength Club",
-    shortName: "Harbor",
+    name: "Demo Gym",
+    shortName: "Demo",
     locale: "en-GB",
-    timezone: "Europe/Dublin",
+    timezone: "Etc/UTC",
   },
   branding: {
-    logoUrl: "./assets/demo-harbor-logo.svg",
-    iconUrl: "./assets/demo-harbor-icon.png",
+    logoUrl: "./assets/logo.svg",
+    iconUrl: "./assets/icon.svg",
     colors: {
       primary: "#174A5B",
       accent: "#F2B84B",
-      background: "#0E2028",
+      background: "#07161C",
       surface: "#FFFFFF",
     },
   },
