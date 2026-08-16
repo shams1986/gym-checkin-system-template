@@ -3,6 +3,8 @@ var ADMIN_ACTIONS = Object.freeze({
   listMembers: listMembers_,
   getMember: getMember_,
   getMemberAttendance: getMemberAttendance_,
+  getAttendance: getAttendance_,
+  getReportData: getReportData_,
   getMemberFormOptions: getMemberFormOptions_,
   createMember: createMember_,
   updateMember: updateMember_,

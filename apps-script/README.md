@@ -31,7 +31,7 @@ The public route accepts `api=checkin&id=<member-id>`. A simple callback identif
 
 Runtime features remaining for later phases:
 
-- Phase 7: attendance views and reports
+- Phase 8: full demo-data acceptance testing
 
 GitHub remains the source of truth. Do not bind this source to AXIS or a live client project, run `clasp push`, or deploy it. Testing against a new development Sheet requires an explicit target confirmation and the checks in `DEPLOYMENT.md` and `docs/SHEETS_SCHEMA.md`.
 
@@ -42,3 +42,5 @@ Phase 5 authentication and UI setup are documented in `docs/ADMIN_SETUP.md`. The
 Apps Script treats trailing-underscore functions as private to server-side code. The scanner implementation, setup routine, and demo loader therefore use `checkIn_`, `setupTemplate_`, and `loadDemoData_`. Maintainers can run the latter two from the Apps Script editor, while browser clients cannot invoke them with `google.script.run`.
 
 Phase 6 uses the protected settings and neutral template contract in `docs/CARD_TEMPLATE.md`. No Slides template, Drive folder, generated card, or deployment binding is committed to this repository.
+
+Phase 7 uses `AttendanceService.gs` and `ReportService.gs` for protected, timezone-aware attendance queries and simple monthly summaries. The owner-visible contract and export behavior are documented in `docs/REPORTS.md`.

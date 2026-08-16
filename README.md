@@ -29,6 +29,7 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- CONFIG.md              Configuration model and security boundary
 |   |-- ADMIN_SETUP.md         Admin authentication and acceptance setup
 |   |-- CARD_TEMPLATE.md       Neutral Slides card template contract
+|   |-- REPORTS.md             Attendance and monthly-report behavior
 |   `-- SHEETS_SCHEMA.md       Phase 2 workbook and setup contract
 |-- scanner/
 |   |-- index.html             Tablet scanner/PWA shell
@@ -61,12 +62,16 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- Admin.css.html         Responsive owner interface styles
 |   |-- CardService.gs         Slides/Drive card generation and batches
 |   |-- CardRepository.gs      Card state and member-link persistence
+|   |-- AttendanceService.gs   Paginated owner attendance queries
+|   |-- ReportService.gs       Simple monthly attendance summaries
 |   `-- appsscript.json        Neutral V8 manifest
 `-- tests/
     |-- phase2-schema.test.js  Local Phase 2 contract checks
     |-- phase2-setup.test.js   Mocked setup/idempotence checks
     |-- phase4-checkin.test.js Backend transaction and route checks
-    `-- phase5-admin.test.js   Authentication and admin-surface checks
+    |-- phase5-admin.test.js   Authentication and admin-surface checks
+    |-- phase6-cards.test.js   Card generation and persistence checks
+    `-- phase7-attendance.test.js Attendance/report query checks
 ```
 
 ## Current phase status
@@ -83,7 +88,9 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 6 — member card workflow:** implemented in source with configurable Google Slides placeholders, Drive output, QR formats, single/regenerate/confirmed batch actions, fault-isolated card state, and admin card status/actions. Live Slides/Drive acceptance checks require the disposable resources documented in `docs/CARD_TEMPLATE.md`.
 
-No reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
+**Phase 7 — attendance views and reports:** implemented in source with protected seven-field attendance views, timezone-aware filters, member history, pagination, export-friendly pages, and monthly top/low-attendance summaries. Live acceptance checks remain for an explicitly approved disposable Apps Script/Sheet target.
+
+Phase 8 demo-data acceptance testing remains pending as defined by `PRODUCT_PLAN.md`.
 
 ## Working rules
 

@@ -127,24 +127,6 @@ function setMemberStatus_(payload) {
   return { memberId: memberId, status: active ? "Active" : "Inactive" };
 }
 
-function getMemberAttendance_(payload) {
-  var memberId = normalizeMemberId_(payload.memberId);
-  if (!findMemberById_(memberId)) {
-    throw adminError_("member_not_found", "Member not found.");
-  }
-  var filters = payload.filters || payload;
-  var settings = getRuntimeSettings_();
-  var timezone = settings.Timezone;
-  var from = adminString_(filters.from, 10);
-  var to = adminString_(filters.to, 10);
-  var rows = readRuntimeRows_("_Raw_Attendance").filter(function (row) {
-    var localDate = Utilities.formatDate(new Date(row.Timestamp), timezone, "yyyy-MM-dd");
-    return normalizeMemberId_(row.MemberID) === memberId && (!from || localDate >= from) && (!to || localDate <= to);
-  }).map(function (row) { return serializeAttendance_(row, timezone); });
-  rows.sort(function (left, right) { return right.timestamp.localeCompare(left.timestamp); });
-  return { items: rows.slice(0, 100), total: rows.length };
-}
-
 function validateMemberInput_(data) {
   data = data || {};
   var fields = {};
