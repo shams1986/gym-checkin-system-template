@@ -31,7 +31,8 @@ assert.match(bundle, /LockService\.getScriptLock\(\)/);
 assert.match(bundle, /member_id_format_locked/);
 assert.match(bundle, /schedule_overlap/);
 const browserCallableFunctions = Array.from(bundle.matchAll(/^function ([A-Za-z0-9]+)\(/gm), (match) => match[1]).sort();
-assert.deepEqual(browserCallableFunctions, ["adminApi", "doGet"], "only the authenticated dispatcher and safe HTTP router may be browser-callable");
+assert.deepEqual(browserCallableFunctions, ["adminApi", "doGet", "runTemplateSetup"], "only authenticated/safe routes and the bound-editor-only setup wrapper may be browser-callable");
+assert.match(bundle, /function runTemplateSetup\(\)[\s\S]*if \(!SpreadsheetApp\.getActiveSpreadsheet\(\)\)[\s\S]*return loadDemoData_\(\)/, "manual setup wrapper must reject web-app/API contexts before mutation");
 
 const properties = {
   ADMIN_GOOGLE_CLIENT_ID: "client.example.apps.googleusercontent.com",

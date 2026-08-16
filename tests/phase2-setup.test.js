@@ -187,6 +187,12 @@ assert.equal(spreadsheet.getSheetByName("Members").getLastRow(), 2);
 assert.equal(spreadsheet.getSheetByName("Schedule").getLastRow(), 2);
 assert.equal(spreadsheet.getSheetByName("Training_Types").getLastRow(), 2);
 assert.equal(spreadsheet.getSheetByName("_Messages").getLastRow(), 2);
+assert.equal(context.runTemplateSetup().syntheticDataOnly, true);
+
+const webContext = createContext(null);
+vm.createContext(webContext);
+vm.runInContext(source, webContext);
+assert.throws(() => webContext.runTemplateSetup(), /must run manually from this spreadsheet-bound Apps Script editor/);
 
 spreadsheet.getSheetByName("Members").getRange(1, 4).setValue("WrongStatusHeader");
 assert.throws(() => context.setupTemplate_(), /Schema mismatch/);

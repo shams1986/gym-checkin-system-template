@@ -39,7 +39,9 @@ Local contract coverage is in `tests/phase4-checkin.test.js`. It does not replac
 
 Phase 5 authentication and UI setup are documented in `docs/ADMIN_SETUP.md`. The admin route renders a sign-in shell publicly, but no operational data or mutation is available until `adminApi` verifies the token and allowlisted email on the server. Implementation handlers end in `_` and cannot be called directly through `google.script.run`.
 
-Apps Script treats trailing-underscore functions as private to server-side code. The scanner implementation, setup routine, and demo loader therefore use `checkIn_`, `setupTemplate_`, and `loadDemoData_`. Maintainers can run the latter two from the Apps Script editor, while browser clients cannot invoke them with `google.script.run`.
+Apps Script treats trailing-underscore functions as private to server-side code. The scanner implementation, setup routine, and demo loader therefore use `checkIn_`, `setupTemplate_`, and `loadDemoData_`; browser clients cannot invoke them with `google.script.run` and the editor function picker does not list them.
+
+For the Apps Script editor function picker, use the public zero-argument `runTemplateSetup` wrapper. It requires an active spreadsheet-bound editor context, then calls the private idempotent setup and demo loader; web-app and Apps Script API executions fail the context guard before any mutation.
 
 Phase 6 uses the protected settings and neutral template contract in `docs/CARD_TEMPLATE.md`. No Slides template, Drive folder, generated card, or deployment binding is committed to this repository. A local development `apps-script/.clasp.json` is intentionally ignored by Git.
 

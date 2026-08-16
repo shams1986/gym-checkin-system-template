@@ -1,3 +1,12 @@
+// Manual editor entry point. The active-spreadsheet guard keeps this unavailable
+// to web-app and Apps Script API execution, which have no active bound container.
+function runTemplateSetup() {
+  if (!SpreadsheetApp.getActiveSpreadsheet()) {
+    throw new Error("runTemplateSetup() must run manually from this spreadsheet-bound Apps Script editor.");
+  }
+  return loadDemoData_();
+}
+
 function loadDemoData_() {
   setupTemplate_();
 

@@ -71,11 +71,11 @@ These tests require a new, disposable Google Sheet and a spreadsheet-bound devel
 
 1. Create a blank development spreadsheet containing no real member data.
 2. Bind a development Apps Script project to it and copy the reviewed `apps-script/` source only after explicit approval for that non-production target.
-3. Run `setupTemplate_({ timezone: "Europe/Vienna" })` twice from the Apps Script editor.
-4. Confirm the first run creates every listed sheet and the second reports no created sheets and preserves values.
+3. Reload the Apps Script editor after `clasp push`, select the public zero-argument `runTemplateSetup` function, and run it twice. It delegates to the private idempotent schema setup and neutral demo loader. Trailing-underscore functions are intentionally private and do not appear in the editor function picker.
+4. Confirm the first run creates every listed sheet and demo rows; the second creates no duplicate sheets or demo rows and preserves values.
 5. Confirm internal sheets are hidden/protected and every owner-readable sheet has the expected managed protection.
 6. Confirm invalid member status, weekday, and unknown training type are rejected.
-7. Run `loadDemoData_()` twice and confirm only one demo member/session/type/message exists.
+7. Confirm only one demo member/session/type/message exists after the two `runTemplateSetup` executions.
 8. Append one synthetic `_Raw_Attendance` row as the setup owner and confirm the seven projected fields appear in `Attendance` with Vienna formatting.
 9. Confirm an ordinary sheet editor cannot manually modify `_Raw_Attendance` or `Attendance`.
 
