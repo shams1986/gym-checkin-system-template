@@ -14,6 +14,12 @@ git status
 
 Review and preserve any existing uncommitted work before continuing.
 
+## Non-deploying template setup
+
+Phase 1 is repository scaffolding only. A maintainer may clone the repository, review `docs/CONFIG.md`, copy `scanner/config.example.js` for a neutral local configuration, and inspect the documented API examples without creating or binding an Apps Script project.
+
+Do not place real client IDs, credentials, member data, or live URLs in example files. Empty deployment-specific values are expected until a later, explicitly authorized installation task. Walking through these steps does not authorize `clasp push`, Apps Script deployment, or publication to production hosting.
+
 ## Frontend changes
 
 The frontend consists of the root-level scanner and PWA files. After reviewing and testing a change:
@@ -53,3 +59,9 @@ Confirm the intended Apps Script project and deployment configuration before run
 - Review the diff before committing.
 - Commit and push Apps Script changes before running `clasp push`.
 - Do not deploy unrelated or uncommitted changes.
+
+## Rollback
+
+For ordinary template source changes, identify the last approved commit and create a normal Git revert commit; do not rewrite shared history or force-push. Review and push the revert through the same Developer/Reviewer workflow.
+
+For a future Apps Script deployment, record the intended project, deployment/version identifier, and matching Git commit before deployment. Roll back by selecting the previously recorded known-good Apps Script version, then verify that GitHub still represents the source of truth. Never perform a live rollback, redeploy, or `clasp push` without explicit user approval for that specific system.
