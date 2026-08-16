@@ -26,18 +26,29 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |-- PRODUCT_PLAN.md            Product scope and phased blueprint
 |-- docs/
 |   |-- API_CONTRACT.md        Frozen Phase 1 scanner state/payload contract
-|   `-- CONFIG.md              Configuration model and security boundary
+|   |-- CONFIG.md              Configuration model and security boundary
+|   `-- SHEETS_SCHEMA.md       Phase 2 workbook and setup contract
 |-- scanner/
 |   `-- config.example.js      Safe public configuration example only
-`-- apps-script/
-    `-- README.md              Backend placeholder; runtime begins later
+|-- apps-script/
+|   |-- README.md              Backend source orientation
+|   |-- Schema.gs              Exact sheet/header/config contracts
+|   |-- SheetRepository.gs     Idempotent sheet setup helpers
+|   |-- Setup.gs               Workbook setup entry point
+|   |-- DemoData.gs            Separate synthetic demo loader
+|   `-- appsscript.json        Neutral V8 manifest
+`-- tests/
+    |-- phase2-schema.test.js  Local Phase 2 contract checks
+    `-- phase2-setup.test.js   Mocked setup/idempotence checks
 ```
 
 ## Current phase status
 
-**Phase 1 — repository structure and configuration model:** implemented by the initial skeleton and contract documents. Phase 1 is complete only after its checks pass and Reviewer Mode approves the diff.
+**Phase 1 — repository structure and configuration model:** complete.
 
-No scanner runtime, Apps Script backend, Google Sheets setup, admin UI, or card generator is implemented in Phase 1. Runtime work begins in the later phases defined by `PRODUCT_PLAN.md`.
+**Phase 2 — Google Sheets schema and setup functions:** implemented in source with exact headers, validation rules, hidden/protected internal sheets, schema metadata, a protected attendance projection, and separate demo data. Completion requires local checks, Reviewer approval, and the manual workbook checks documented in `docs/SHEETS_SCHEMA.md` when an approved disposable development Sheet is available.
+
+No scanner, check-in API, admin UI, card generator, or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
 
 ## Working rules
 
