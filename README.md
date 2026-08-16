@@ -27,6 +27,7 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |-- docs/
 |   |-- API_CONTRACT.md        Frozen Phase 1 scanner state/payload contract
 |   |-- CONFIG.md              Configuration model and security boundary
+|   |-- ADMIN_SETUP.md         Admin authentication and acceptance setup
 |   `-- SHEETS_SCHEMA.md       Phase 2 workbook and setup contract
 |-- scanner/
 |   |-- index.html             Tablet scanner/PWA shell
@@ -42,7 +43,7 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- README.md              Backend source orientation
 |   |-- Schema.gs              Exact sheet/header/config contracts
 |   |-- SheetRepository.gs     Idempotent sheet setup helpers
-|   |-- Setup.gs               Workbook setup entry point
+|   |-- Setup.gs               Private workbook setup entry point
 |   |-- DemoData.gs            Separate synthetic demo loader
 |   |-- RuntimeRepository.gs   Validated runtime data/config access
 |   |-- MemberRepository.gs    Normalized member lookup
@@ -51,11 +52,18 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- ResponseFactory.gs     Frozen scanner response construction
 |   |-- CheckInService.gs      Lock-protected check-in transaction
 |   |-- WebApp.gs              Public JSON/JSONP check-in route
+|   |-- AdminAuth.gs           Google token and owner authorization
+|   |-- AdminApi.gs            Allowlisted protected admin RPC boundary
+|   |-- Admin*Service.gs       Owner dashboard and management operations
+|   |-- Admin.html             Owner application shell
+|   |-- Admin.js.html          Navigation, forms, and interface states
+|   |-- Admin.css.html         Responsive owner interface styles
 |   `-- appsscript.json        Neutral V8 manifest
 `-- tests/
     |-- phase2-schema.test.js  Local Phase 2 contract checks
     |-- phase2-setup.test.js   Mocked setup/idempotence checks
-    `-- phase4-checkin.test.js Backend transaction and route checks
+    |-- phase4-checkin.test.js Backend transaction and route checks
+    `-- phase5-admin.test.js   Authentication and admin-surface checks
 ```
 
 ## Current phase status
@@ -68,7 +76,9 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 4 — template check-in backend:** implemented in source with normalized member lookup, status and category validation, timezone-aware schedule windows, per-session duplicate prevention under a short script lock, complete scanner responses, safe JSONP output, and bounded error logs. Local contract tests cover the deterministic transaction; concurrency, delayed responses, and live web-app behavior remain manual checks on an explicitly approved disposable development target.
 
-No admin UI, card generator, or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
+**Phase 5 — owner/admin panel MVP:** implemented in source with Google-token authorization, an explicit action allowlist, Dashboard, Members, Add/Edit Member, Member Detail, Schedule, Settings, and basic-message workflows. Live identity and Apps Script acceptance checks require the disposable resources documented in `docs/ADMIN_SETUP.md`.
+
+No card generator or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
 
 ## Working rules
 

@@ -169,34 +169,34 @@ const context = createContext(spreadsheet);
 vm.createContext(context);
 vm.runInContext(source, context);
 
-const first = context.setupTemplate();
+const first = context.setupTemplate_();
 assert.equal(first.createdSheets.length, 12);
 assert.equal(first.attendanceProjection, "protected_array_formula");
 const installationId = spreadsheet.getSheetByName("_Internal_Config").getRange(3, 2).getValue();
 
-const second = context.setupTemplate();
+const second = context.setupTemplate_();
 assert.equal(second.createdSheets.length, 0);
 assert.equal(spreadsheet.getSheetByName("_Internal_Config").getRange(3, 2).getValue(), installationId);
 assert.match(spreadsheet.getSheetByName("Attendance").getRange("A2").getFormula(), /ARRAYFORMULA/);
 assert.equal(spreadsheet.getSheetByName("_Raw_Attendance").hidden, true);
 assert.equal(spreadsheet.getSheetByName("Members").protections.length, 1);
 
-context.loadDemoData();
-context.loadDemoData();
+context.loadDemoData_();
+context.loadDemoData_();
 assert.equal(spreadsheet.getSheetByName("Members").getLastRow(), 2);
 assert.equal(spreadsheet.getSheetByName("Schedule").getLastRow(), 2);
 assert.equal(spreadsheet.getSheetByName("Training_Types").getLastRow(), 2);
 assert.equal(spreadsheet.getSheetByName("_Messages").getLastRow(), 2);
 
 spreadsheet.getSheetByName("Members").getRange(1, 4).setValue("WrongStatusHeader");
-assert.throws(() => context.setupTemplate(), /Schema mismatch/);
+assert.throws(() => context.setupTemplate_(), /Schema mismatch/);
 assert.equal(spreadsheet.getSheetByName("Members").getRange(1, 4).getValue(), "WrongStatusHeader");
 
 const invalidSpreadsheet = new MockSpreadsheet();
 const invalidContext = createContext(invalidSpreadsheet);
 vm.createContext(invalidContext);
 vm.runInContext(source, invalidContext);
-assert.throws(() => invalidContext.setupTemplate({ timezone: "Not/A_Timezone" }), /Invalid IANA timezone/);
+assert.throws(() => invalidContext.setupTemplate_({ timezone: "Not/A_Timezone" }), /Invalid IANA timezone/);
 assert.equal(invalidSpreadsheet.sheets.size, 0);
 
 console.log("Phase 2 setup idempotence checks passed.");

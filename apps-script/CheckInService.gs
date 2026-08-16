@@ -1,4 +1,4 @@
-function checkIn(memberId, requestMeta) {
+function checkIn_(memberId, requestMeta) {
   requestMeta = requestMeta || {};
   var normalizedId = normalizeMemberId_(memberId);
   var requestId = truncateRuntimeText_(requestMeta.requestId, 80);

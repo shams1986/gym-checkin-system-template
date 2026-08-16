@@ -2,17 +2,17 @@
 
 ## Phase 2 scope
 
-`setupTemplate(options?)` creates or verifies the template workbook without deleting rows or overwriting existing headers. It is safe to rerun against a workbook already created by the same schema version. A mismatched header, schema version, attendance formula, or manually populated attendance projection stops setup with a migration error.
+`setupTemplate_(options?)` creates or verifies the template workbook without deleting rows or overwriting existing headers. The trailing underscore keeps this maintainer routine private from HtmlService browser clients. It is safe to rerun against a workbook already created by the same schema version. A mismatched header, schema version, attendance formula, or manually populated attendance projection stops setup with a migration error.
 
-Phase 2 does not implement check-in, scanner, card, admin, or reporting runtime behavior. `loadDemoData()` is separate and never runs during production setup.
+`loadDemoData_()` is separate and never runs during production setup. Both setup functions are run only by a maintainer from the Apps Script editor.
 
 ## Setup entry points
 
-- `setupTemplate()` creates/verifies the schema and preserves the spreadsheet's existing timezone.
-- `setupTemplate({ timezone: "Europe/Vienna" })` validates and applies an explicit IANA timezone and updates the visible `Timezone` setting.
-- `loadDemoData()` calls setup, then idempotently adds one synthetic member, training type, schedule row, and message. It does not add attendance.
+- `setupTemplate_()` creates/verifies the schema and preserves the spreadsheet's existing timezone.
+- `setupTemplate_({ timezone: "Europe/Vienna" })` validates and applies an explicit IANA timezone and updates the visible `Timezone` setting.
+- `loadDemoData_()` calls setup, then idempotently adds one synthetic member, training type, schedule row, and message. It does not add attendance.
 
-`setupTemplate()` returns the schema version, sheets created on that run, all verified sheet names, and `attendanceProjection: "protected_array_formula"`.
+`setupTemplate_()` returns the schema version, sheets created on that run, all verified sheet names, and `attendanceProjection: "protected_array_formula"`.
 
 ## Owner-readable sheets
 
@@ -71,11 +71,11 @@ These tests require a new, disposable Google Sheet and a spreadsheet-bound devel
 
 1. Create a blank development spreadsheet containing no real member data.
 2. Bind a development Apps Script project to it and copy the reviewed `apps-script/` source only after explicit approval for that non-production target.
-3. Run `setupTemplate({ timezone: "Europe/Vienna" })` twice.
+3. Run `setupTemplate_({ timezone: "Europe/Vienna" })` twice from the Apps Script editor.
 4. Confirm the first run creates every listed sheet and the second reports no created sheets and preserves values.
 5. Confirm internal sheets are hidden/protected and every owner-readable sheet has the expected managed protection.
 6. Confirm invalid member status, weekday, and unknown training type are rejected.
-7. Run `loadDemoData()` twice and confirm only one demo member/session/type/message exists.
+7. Run `loadDemoData_()` twice and confirm only one demo member/session/type/message exists.
 8. Append one synthetic `_Raw_Attendance` row as the setup owner and confirm the seven projected fields appear in `Attendance` with Vienna formatting.
 9. Confirm an ordinary sheet editor cannot manually modify `_Raw_Attendance` or `Attendance`.
 

@@ -64,7 +64,7 @@ Secrets and credentials belong in Apps Script properties or the deployment platf
 
 ## Admin authentication decision
 
-The protected admin application will require a Google identity token and authorize the verified email against `protected.admin.allowedEmails`, stored outside public scanner configuration. Token verification and allowlist enforcement must happen server-side on every protected admin call. The anonymous scanner endpoint grants no admin authority and cannot route internal helpers.
+The protected admin application requires a Google identity token and authorizes the verified email against `protected.admin.allowedEmails`, stored outside public scanner configuration. The installation stores the OAuth web client ID in the `ADMIN_GOOGLE_CLIENT_ID` Apps Script property and the allowlist as a JSON array in `ADMIN_ALLOWED_EMAILS`. Token audience, expiry, verified-email status, and allowlist membership are checked server-side on every protected admin call. The anonymous scanner endpoint grants no admin authority and cannot route internal helpers. See `ADMIN_SETUP.md` for non-deploying setup and acceptance checks.
 
 Admin authentication is a frozen architectural decision in Phase 1; implementation and unauthorized/authorized tests belong to Phase 5. No admin write endpoint may be exposed before that enforcement exists.
 

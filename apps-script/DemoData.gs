@@ -1,5 +1,5 @@
-function loadDemoData() {
-  setupTemplate();
+function loadDemoData_() {
+  setupTemplate_();
 
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var trainingTypes = spreadsheet.getSheetByName("Training_Types");

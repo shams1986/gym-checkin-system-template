@@ -6,8 +6,8 @@ Current files:
 
 - `Schema.gs`: exact sheet/header contracts, enums, settings defaults, and attendance projection
 - `SheetRepository.gs`: idempotent sheet/header/protection helpers
-- `Setup.gs`: `setupTemplate(options?)`, validations, formats, visibility, metadata, and timezone handling
-- `DemoData.gs`: separate opt-in synthetic demo loader
+- `Setup.gs`: private maintainer entry point `setupTemplate_(options?)`, validations, formats, visibility, metadata, and timezone handling
+- `DemoData.gs`: separate private opt-in synthetic demo loader `loadDemoData_()`
 - `RuntimeRepository.gs`: validated runtime table and setting access
 - `MemberRepository.gs`: normalized member lookup
 - `ScheduleService.gs`: timezone-aware schedule and audience resolution
@@ -15,16 +15,27 @@ Current files:
 - `ResponseFactory.gs`: stable machine-readable scanner response construction
 - `CheckInService.gs`: lock-protected check-in transaction
 - `WebApp.gs`: public check-in route and safe JSON/JSONP output
+- `AdminAuth.gs`: Google ID-token verification against protected script properties
+- `AdminApi.gs`: browser-callable admin RPC dispatcher and action allowlist
+- `AdminRepository.gs`: shared private admin data helpers
+- `AdminDashboardService.gs`: dashboard counts, sessions, and recent attendance
+- `AdminMemberService.gs`: member list/detail/create/edit/status and attendance queries
+- `AdminScheduleService.gs`: schedule and training-type management with overlap validation
+- `AdminSettingsService.gs`: validated settings, public scanner config, messages, and card-readiness checks
+- `Admin.html`, `Admin.js.html`, `Admin.css.html`: authenticated responsive owner interface
 - `appsscript.json`: neutral V8 manifest with UTC default
 
 The public route accepts `api=checkin&id=<member-id>`. A simple callback identifier may be supplied for JSONP; unsafe callback values are rejected and never reflected. See `docs/API_CONTRACT.md` for the frozen response fields.
 
 Runtime features remaining for later phases:
 
-- Phase 5: authenticated owner/admin application
 - Phase 6: member ID and QR card workflow
 - Phase 7: attendance views and reports
 
 GitHub remains the source of truth. Do not bind this source to AXIS or a live client project, run `clasp push`, or deploy it. Testing against a new development Sheet requires an explicit target confirmation and the checks in `DEPLOYMENT.md` and `docs/SHEETS_SCHEMA.md`.
 
 Local contract coverage is in `tests/phase4-checkin.test.js`. It does not replace the Phase 4 manual checks on an explicitly approved disposable development Apps Script project and Sheet: open/close boundaries, category eligibility, concurrent requests, malformed callbacks, missing sheets, and scanner timeout behavior.
+
+Phase 5 authentication and UI setup are documented in `docs/ADMIN_SETUP.md`. The admin route renders a sign-in shell publicly, but no operational data or mutation is available until `adminApi` verifies the token and allowlisted email on the server. Implementation handlers end in `_` and cannot be called directly through `google.script.run`.
+
+Apps Script treats trailing-underscore functions as private to server-side code. The scanner implementation, setup routine, and demo loader therefore use `checkIn_`, `setupTemplate_`, and `loadDemoData_`. Maintainers can run the latter two from the Apps Script editor, while browser clients cannot invoke them with `google.script.run`.

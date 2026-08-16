@@ -49,8 +49,8 @@ assert.deepEqual(manifest, {
   runtimeVersion: "V8",
 });
 
-assert.match(source, /function setupTemplate\(options\)/);
-assert.match(source, /function loadDemoData\(\)/);
+assert.match(source, /function setupTemplate_\(options\)/);
+assert.match(source, /function loadDemoData_\(\)/);
 assert.match(source, /setup will not overwrite existing headers or data/);
 assert.match(source, /Existing schema version/);
 assert.doesNotMatch(source, /function (doGet|doPost|checkIn|generateMemberCard)\(/);

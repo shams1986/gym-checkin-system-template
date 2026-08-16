@@ -1,5 +1,8 @@
 function doGet(event) {
   var parameters = event && event.parameter ? event.parameter : {};
+  if (String(parameters.api || "") === "admin") {
+    return renderAdminApp_();
+  }
   var callback = String(parameters.callback || "");
   var response;
 
@@ -8,10 +11,16 @@ function doGet(event) {
     return createPublicOutput_(response, "");
   }
 
-  if (String(parameters.api || "") !== "checkin") {
+  if (String(parameters.api || "") === "config") {
+    try {
+      response = getPublicScannerConfig_();
+    } catch (error) {
+      response = { schemaVersion: 1, error: "configuration_unavailable" };
+    }
+  } else if (String(parameters.api || "") !== "checkin") {
     response = createScannerResponse_("error", "invalid_payload", {}, {});
   } else {
-    response = checkIn(parameters.id, {
+    response = checkIn_(parameters.id, {
       requestId: parameters.requestId,
       source: "scanner_jsonp",
     });

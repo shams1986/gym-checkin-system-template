@@ -155,7 +155,7 @@ function createHarness() {
 const { context, sheets } = createHarness();
 const expectedFields = ["result", "reason", "memberId", "firstName", "trainingType", "trainingName", "trainingStart", "title", "subtitle", "message", "color", "sound"];
 
-const success = context.checkIn(" gym-0001 ", { now: new Date("2026-08-17T09:40:00Z"), source: "test" });
+const success = context.checkIn_(" gym-0001 ", { now: new Date("2026-08-17T09:40:00Z"), source: "test" });
 assert.deepEqual(Object.keys(success), expectedFields);
 assert.equal(success.result, "success");
 assert.equal(success.reason, "attendance_recorded");
@@ -164,32 +164,32 @@ assert.equal(success.message, "Great work!");
 assert.equal(sheets._Raw_Attendance.rows.length, 2);
 assert.equal(sheets._State.rows.length, 2);
 
-const duplicate = context.checkIn("GYM-0001", { now: new Date("2026-08-17T10:30:00Z") });
+const duplicate = context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:30:00Z") });
 assert.equal(duplicate.result, "duplicate");
 assert.equal(duplicate.reason, "already_checked_in");
 assert.equal(sheets._Raw_Attendance.rows.length, 2, "duplicate must not append attendance");
 
-const closingBoundary = context.checkIn("GYM-0002", { now: new Date("2026-08-17T10:30:00Z") });
+const closingBoundary = context.checkIn_("GYM-0002", { now: new Date("2026-08-17T10:30:00Z") });
 assert.equal(closingBoundary.result, "success", "closing boundary is inclusive");
 assert.equal(sheets._Raw_Attendance.rows.length, 3);
 
-const outside = context.checkIn("GYM-0002", { now: new Date("2026-08-17T09:39:59Z") });
+const outside = context.checkIn_("GYM-0002", { now: new Date("2026-08-17T09:39:59Z") });
 assert.equal(outside.result, "outside_window");
 assert.equal(outside.reason, "no_open_training");
 
-const unknown = context.checkIn("GYM-9999", { now: new Date("2026-08-17T10:00:00Z") });
+const unknown = context.checkIn_("GYM-9999", { now: new Date("2026-08-17T10:00:00Z") });
 assert.equal(unknown.result, "not_found");
 assert.equal(unknown.reason, "member_not_found");
 
-const inactive = context.checkIn("GYM-0003", { now: new Date("2026-08-17T10:00:00Z") });
+const inactive = context.checkIn_("GYM-0003", { now: new Date("2026-08-17T10:00:00Z") });
 assert.equal(inactive.result, "inactive");
 assert.equal(inactive.reason, "member_inactive");
 
-const categoryMismatch = context.checkIn("GYM-0004", { now: new Date("2026-08-18T10:00:00Z") });
+const categoryMismatch = context.checkIn_("GYM-0004", { now: new Date("2026-08-18T10:00:00Z") });
 assert.equal(categoryMismatch.result, "outside_window");
 assert.equal(categoryMismatch.reason, "category_not_eligible");
 
-const invalid = context.checkIn("<script>", { now: new Date("2026-08-17T10:00:00Z") });
+const invalid = context.checkIn_("<script>", { now: new Date("2026-08-17T10:00:00Z") });
 assert.equal(invalid.result, "error");
 assert.equal(invalid.reason, "invalid_payload");
 assert.equal(sheets._Raw_Attendance.rows.length, 3, "rejected results must not write attendance");
@@ -204,7 +204,7 @@ assert.equal(unsafeJsonp.mimeType, "json");
 assert.doesNotMatch(unsafeJsonp.text, /alert/);
 
 delete sheets.Members;
-const backendError = context.checkIn("GYM-0001", { now: new Date("2026-08-17T10:00:00Z"), requestId: "request-1" });
+const backendError = context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:00:00Z"), requestId: "request-1" });
 assert.equal(backendError.result, "error");
 assert.equal(backendError.reason, "backend_error");
 assert.equal(sheets._Logs.rows.length, 2);
@@ -217,25 +217,25 @@ interleaved.context.LockService.getScriptLock = () => ({
   tryLock() {
     if (!enteringNestedCall) {
       enteringNestedCall = true;
-      nestedResult = interleaved.context.checkIn("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
+      nestedResult = interleaved.context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
       enteringNestedCall = false;
     }
     return true;
   },
   releaseLock() {},
 });
-const outerResult = interleaved.context.checkIn("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
+const outerResult = interleaved.context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
 assert.deepEqual([outerResult.result, nestedResult.result].sort(), ["duplicate", "success"]);
 assert.equal(interleaved.sheets._Raw_Attendance.rows.length, 2, "interleaved requests create one event");
 
 const stateFailure = createHarness();
 const originalStateAppend = stateFailure.sheets._State.appendRow.bind(stateFailure.sheets._State);
 stateFailure.sheets._State.appendRow = () => { throw new Error("injected state failure"); };
-const failedWrite = stateFailure.context.checkIn("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
+const failedWrite = stateFailure.context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
 assert.equal(failedWrite.result, "error");
 assert.equal(stateFailure.sheets._Raw_Attendance.rows.length, 1, "state failure rolls back raw attendance");
 stateFailure.sheets._State.appendRow = originalStateAppend;
-const retryAfterRollback = stateFailure.context.checkIn("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
+const retryAfterRollback = stateFailure.context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
 assert.equal(retryAfterRollback.result, "success");
 assert.equal(stateFailure.sheets._Raw_Attendance.rows.length, 2, "retry records exactly one attendance event");
 

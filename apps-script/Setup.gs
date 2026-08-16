@@ -1,4 +1,4 @@
-function setupTemplate(options) {
+function setupTemplate_(options) {
   var setupOptions = options || {};
   var lock = LockService.getDocumentLock();
   lock.waitLock(30000);
@@ -6,7 +6,7 @@ function setupTemplate(options) {
   try {
     var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     if (!spreadsheet) {
-      throw new Error("setupTemplate() must run from a spreadsheet-bound Apps Script project.");
+      throw new Error("setupTemplate_() must run from a spreadsheet-bound Apps Script project.");
     }
 
     var timezone = resolveTemplateTimezone_(spreadsheet, setupOptions.timezone);

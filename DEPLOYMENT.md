@@ -20,6 +20,8 @@ Phase 1 is repository scaffolding only. A maintainer may clone the repository, r
 
 Do not place real client IDs, credentials, member data, or live URLs in example files. Empty deployment-specific values are expected until a later, explicitly authorized installation task. Walking through these steps does not authorize `clasp push`, Apps Script deployment, or publication to production hosting.
 
+Phase 5 admin testing additionally requires a new development Sheet, spreadsheet-bound Apps Script project, OAuth web client, and protected script properties. The exact resource and manual-test checklist is in `docs/ADMIN_SETUP.md`. Create and confirm those resources before any `clasp push`; never reuse AXIS or client-production identifiers for template testing.
+
 ## Frontend changes
 
 The frontend consists of the root-level scanner and PWA files. After reviewing and testing a change:

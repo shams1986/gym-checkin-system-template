@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>Gym Check-in Admin</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style><?!= includeAdminFile_("Admin.css"); ?></style>
+</head>
+<body>
+  <div id="auth-view" class="auth-shell">
+    <section class="auth-card">
+      <div class="brand-mark">GC</div>
+      <p class="eyebrow">Owner workspace</p>
+      <h1>Gym Check-in Admin</h1>
+      <p>Sign in with an authorized Google account to manage this gym.</p>
+      <div id="google-signin"></div>
+      <p id="auth-error" class="form-error" role="alert"></p>
+    </section>
+  </div>
+
+  <div id="admin-shell" class="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="wordmark" href="#dashboard"><span class="brand-mark small">GC</span><span id="gym-short-name">Gym Admin</span></a>
+      <nav aria-label="Admin navigation">
+        <button data-route="dashboard" class="nav-link active">Dashboard</button>
+        <button data-route="members" class="nav-link">Members</button>
+        <button data-route="schedule" class="nav-link">Schedule</button>
+        <button data-route="settings" class="nav-link">Settings</button>
+      </nav>
+      <div class="sidebar-footer"><span id="admin-email"></span><button id="sign-out" class="text-button">Sign out</button></div>
+    </aside>
+    <main>
+      <header class="mobile-header"><button id="menu-toggle" aria-label="Toggle navigation">Menu</button><strong id="mobile-title">Dashboard</strong></header>
+      <div id="notice" class="notice" hidden role="status"></div>
+      <section id="view" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <dialog id="editor-dialog">
+    <form id="editor-form" method="dialog">
+      <header><div><p class="eyebrow" id="editor-eyebrow"></p><h2 id="editor-title"></h2></div><button type="button" data-dialog-close class="icon-button" aria-label="Close">×</button></header>
+      <div id="editor-error" class="form-error" role="alert"></div>
+      <div id="editor-fields" class="form-grid"></div>
+      <footer><button type="button" data-dialog-close class="button secondary">Cancel</button><button id="editor-secondary-action" type="button" class="button secondary" hidden disabled>Save and generate card (Phase 6)</button><button id="editor-save" value="default" class="button primary">Save</button></footer>
+    </form>
+  </dialog>
+
+  <script>window.ADMIN_OAUTH_CLIENT_ID = <?!= oauthClientIdJson ?>;</script>
+  <script><?!= includeAdminFile_("Admin.js"); ?></script>
+</body>
+</html>
