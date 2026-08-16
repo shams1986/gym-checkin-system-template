@@ -12,27 +12,24 @@ Phase 6 generates one Google Slides file per member from a reusable, single-slid
 6. Put the template file ID and output folder ID into the protected admin Settings screen.
 7. Use `Test card configuration` before generating a card.
 
-Do not use a real member as placeholder content. A neutral demo slide could contain:
+Do not use a real member as placeholder content. The default neutral vertical template contains only these visible placeholders:
 
 ```text
-{{GYM_NAME}}
-{{FIRST_NAME}} {{LAST_NAME}}
-Member: {{MEMBER_ID}}
-Category: {{CATEGORY}}
-Status: {{MEMBERSHIP}}
+{{FIRST_NAME}}
+{{LAST_NAME}}
 {{QR_CODE}}
 ```
 
 ## Placeholder settings
 
-All placeholders are configurable. The five core placeholders are required and must be unique. Membership and category placeholders may be blank to omit them.
+All placeholders are configurable. Only first name, last name, and QR are required and must be unique. Gym name, visible member ID, membership, and category placeholders are optional and may be blank. The member ID remains available to the QR value and output filename even when it is not printed on the card.
 
 | Setting | Neutral default | Replacement |
 |---|---|---|
-| `CardGymNamePlaceholder` | `{{GYM_NAME}}` | Configured gym name |
+| `CardGymNamePlaceholder` | blank | Configured gym name; optional |
 | `CardFirstNamePlaceholder` | `{{FIRST_NAME}}` | Member first name |
 | `CardLastNamePlaceholder` | `{{LAST_NAME}}` | Member last name |
-| `CardMemberIdPlaceholder` | `{{MEMBER_ID}}` | Immutable generated member ID |
+| `CardMemberIdPlaceholder` | blank | Immutable generated member ID; optional visible text |
 | `CardQrPlaceholder` | `{{QR_CODE}}` | QR image; must be the only text in its text box |
 | `CardMembershipPlaceholder` | `{{MEMBERSHIP}}` | Current `Active`/`Inactive` status; optional |
 | `CardCategoryPlaceholder` | `{{CATEGORY}}` | Member category; optional |

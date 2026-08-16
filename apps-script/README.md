@@ -41,6 +41,6 @@ Phase 5 authentication and UI setup are documented in `docs/ADMIN_SETUP.md`. The
 
 Apps Script treats trailing-underscore functions as private to server-side code. The scanner implementation, setup routine, and demo loader therefore use `checkIn_`, `setupTemplate_`, and `loadDemoData_`. Maintainers can run the latter two from the Apps Script editor, while browser clients cannot invoke them with `google.script.run`.
 
-Phase 6 uses the protected settings and neutral template contract in `docs/CARD_TEMPLATE.md`. No Slides template, Drive folder, generated card, or deployment binding is committed to this repository.
+Phase 6 uses the protected settings and neutral template contract in `docs/CARD_TEMPLATE.md`. No Slides template, Drive folder, generated card, or deployment binding is committed to this repository. A local development `apps-script/.clasp.json` is intentionally ignored by Git.
 
 Phase 7 uses `AttendanceService.gs` and `ReportService.gs` for protected, timezone-aware attendance queries and simple monthly summaries. The owner-visible contract and export behavior are documented in `docs/REPORTS.md`.

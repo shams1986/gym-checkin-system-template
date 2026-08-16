@@ -145,14 +145,14 @@ function getCardConfiguration_() {
   var settings = getRuntimeSettings_();
   var config = {
     templateId: adminString_(settings.CardTemplateID, 200), outputFolderId: adminString_(settings.CardOutputFolderID, 200), timezone: settings.Timezone,
-    gymNamePlaceholder: adminString_(settings.CardGymNamePlaceholder || "{{GYM_NAME}}", 80), firstNamePlaceholder: adminString_(settings.CardFirstNamePlaceholder || "{{FIRST_NAME}}", 80), lastNamePlaceholder: adminString_(settings.CardLastNamePlaceholder || "{{LAST_NAME}}", 80), memberIdPlaceholder: adminString_(settings.CardMemberIdPlaceholder || "{{MEMBER_ID}}", 80), qrPlaceholder: adminString_(settings.CardQrPlaceholder || "{{QR_CODE}}", 80),
+    gymNamePlaceholder: adminString_(settings.CardGymNamePlaceholder, 80), firstNamePlaceholder: adminString_(settings.CardFirstNamePlaceholder || "{{FIRST_NAME}}", 80), lastNamePlaceholder: adminString_(settings.CardLastNamePlaceholder || "{{LAST_NAME}}", 80), memberIdPlaceholder: adminString_(settings.CardMemberIdPlaceholder, 80), qrPlaceholder: adminString_(settings.CardQrPlaceholder || "{{QR_CODE}}", 80),
     membershipPlaceholder: adminString_(settings.CardMembershipPlaceholder, 80), categoryPlaceholder: adminString_(settings.CardCategoryPlaceholder, 80), qrValueFormat: adminString_(settings.CardQrValueFormat || "{memberId}", 500), fileNameFormat: adminString_(settings.CardFileNameFormat || "{memberId}-{firstName}-{lastName}", 200), qrImageEndpoint: adminString_(settings.CardQrImageEndpoint || "", 1000),
     gymName: String(settings.GymName || "Demo Gym"), scannerUrl: String(settings.ScannerURL || ""),
   };
   if (!/^[A-Za-z0-9_-]{10,200}$/.test(config.templateId) || !/^[A-Za-z0-9_-]{10,200}$/.test(config.outputFolderId)) throw adminError_("card_not_configured", "Configure a valid Slides template ID and Drive output folder ID first.");
-  var requiredPlaceholders = [config.gymNamePlaceholder, config.firstNamePlaceholder, config.lastNamePlaceholder, config.memberIdPlaceholder, config.qrPlaceholder];
+  var requiredPlaceholders = [config.firstNamePlaceholder, config.lastNamePlaceholder, config.qrPlaceholder];
   if (requiredPlaceholders.some(function (value) { return !value; }) || requiredPlaceholders.some(function (value, index) { return requiredPlaceholders.indexOf(value) !== index; })) throw adminError_("card_not_configured", "Required card placeholders must be present and unique.");
-  var allPlaceholders = requiredPlaceholders.concat([config.membershipPlaceholder, config.categoryPlaceholder]).filter(Boolean);
+  var allPlaceholders = requiredPlaceholders.concat([config.gymNamePlaceholder, config.memberIdPlaceholder, config.membershipPlaceholder, config.categoryPlaceholder]).filter(Boolean);
   if (allPlaceholders.some(function (value, index) { return allPlaceholders.indexOf(value) !== index; })) throw adminError_("card_not_configured", "Card placeholders must be unique.");
   validateCardFormat_(config.qrValueFormat, true);
   validateCardFormat_(config.fileNameFormat, false);

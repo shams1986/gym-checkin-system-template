@@ -71,10 +71,10 @@ const context = {
     ScannerURL: "https://scanner.example.invalid/checkin",
     CardTemplateID: "template_12345",
     CardOutputFolderID: "folder_1234567",
-    CardGymNamePlaceholder: "{{GYM_NAME}}",
+    CardGymNamePlaceholder: "",
     CardFirstNamePlaceholder: "{{FIRST_NAME}}",
     CardLastNamePlaceholder: "{{LAST_NAME}}",
-    CardMemberIdPlaceholder: "{{MEMBER_ID}}",
+    CardMemberIdPlaceholder: "",
     CardQrPlaceholder: "{{QR_CODE}}",
     CardMembershipPlaceholder: "{{MEMBERSHIP}}",
     CardCategoryPlaceholder: "{{CATEGORY}}",
@@ -120,6 +120,7 @@ assert.equal(copiedFiles[0].name, "GYM0001-Zoë - Demo-O'Example");
 assert.match(lastQrUrl, /https%3A%2F%2Fscanner\.example\.invalid%2Fcheckin%3Fid%3DGYM0001/);
 assert.equal(insertedImages.length, 1);
 assert.ok(replacements.some(([placeholder, value]) => placeholder === "{{CATEGORY}}" && value === "Adult"));
+assert.ok(!replacements.some(([placeholder]) => placeholder === "{{GYM_NAME}}" || placeholder === "{{MEMBER_ID}}"), "optional visible placeholders may be omitted while the QR still encodes memberId");
 assert.equal(scriptProperties.size, 0, "the per-member lease is released after generation");
 const heldLease = context.acquireCardGenerationLease_("GYM0001");
 assert.throws(() => context.acquireCardGenerationLease_("GYM0001"), (error) => error.adminCode === "busy");
@@ -216,6 +217,7 @@ const adminClient = fs.readFileSync(path.join(appsScript, "Admin.js.html"), "utf
 const adminHtml = fs.readFileSync(path.join(appsScript, "Admin.html"), "utf8");
 const cardDocs = fs.readFileSync(path.join(root, "docs", "CARD_TEMPLATE.md"), "utf8");
 for (const expected of ["QR Cards", "generateMemberCard", "regenerateMemberCard", "generateMissingMemberCards", "Save and generate card", "Open / download"]) assert.match(`${adminHtml}\n${adminClient}`, new RegExp(expected));
-for (const placeholder of ["{{GYM_NAME}}", "{{FIRST_NAME}}", "{{LAST_NAME}}", "{{MEMBER_ID}}", "{{QR_CODE}}", "{{MEMBERSHIP}}", "{{CATEGORY}}"]) assert.ok(cardDocs.includes(placeholder));
+for (const placeholder of ["{{FIRST_NAME}}", "{{LAST_NAME}}", "{{QR_CODE}}"]) assert.ok(cardDocs.includes(placeholder));
+for (const optionalSetting of ["CardGymNamePlaceholder", "CardMemberIdPlaceholder", "CardMembershipPlaceholder", "CardCategoryPlaceholder"]) assert.ok(cardDocs.includes(optionalSetting));
 
 console.log("Phase 6 card generation, regeneration, batch isolation, and admin contract checks passed.");
