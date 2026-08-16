@@ -40,6 +40,8 @@ assert.deepEqual(Array.from(context.TEMPLATE_ENUMS.memberStatus), ["Active", "In
 assert.equal(context.TEMPLATE_SHEETS.filter((sheet) => sheet.visibility === "internal").length, 6);
 assert.match(context.ATTENDANCE_PROJECTION_FORMULA, /_Raw_Attendance'!B2:B/);
 assert.match(context.ATTENDANCE_PROJECTION_FORMULA, /_Raw_Attendance'!J2:J/);
+assert.match(context.ATTENDANCE_PROJECTION_FORMULA, /IFERROR\(FILTER/);
+assert.notEqual(context.ATTENDANCE_PROJECTION_FORMULA, context.LEGACY_ATTENDANCE_PROJECTION_FORMULA);
 
 const manifest = JSON.parse(fs.readFileSync(path.join(appsScript, "appsscript.json"), "utf8"));
 assert.deepEqual(manifest, {

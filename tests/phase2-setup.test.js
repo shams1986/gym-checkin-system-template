@@ -24,6 +24,14 @@ class MockRange {
     );
   }
 
+  getFormulas() {
+    return Array.from({ length: this.rowCount }, (_, rowOffset) =>
+      Array.from({ length: this.columnCount }, (_, columnOffset) =>
+        this.sheet.getCell(this.row + rowOffset, this.column + columnOffset).formula,
+      ),
+    );
+  }
+
   setValues(values) {
     values.forEach((row, rowOffset) => row.forEach((value, columnOffset) => {
       this.sheet.getCell(this.row + rowOffset, this.column + columnOffset).value = value;
@@ -66,8 +74,9 @@ class MockProtection {
 }
 
 class MockSheet {
-  constructor(name) {
+  constructor(name, id) {
     this.name = name;
+    this.id = id;
     this.cells = new Map();
     this.maxRows = 1000;
     this.maxColumns = 26;
@@ -82,6 +91,7 @@ class MockSheet {
     return this.cells.get(key);
   }
   getName() { return this.name; }
+  getSheetId() { return this.id; }
   getMaxRows() { return this.maxRows; }
   getMaxColumns() { return this.maxColumns; }
   insertColumnsAfter(after, count) { this.maxColumns = Math.max(this.maxColumns, after + count); }
@@ -123,7 +133,9 @@ class MockSpreadsheet {
     this.sheets = new Map();
   }
   getSheetByName(name) { return this.sheets.get(name) || null; }
-  insertSheet(name) { const sheet = new MockSheet(name); this.sheets.set(name, sheet); return sheet; }
+  insertSheet(name) { const sheet = new MockSheet(name, this.sheets.size); this.sheets.set(name, sheet); return sheet; }
+  getSheets() { return Array.from(this.sheets.values()); }
+  deleteSheet(sheet) { this.sheets.delete(sheet.getName()); }
   getSpreadsheetTimeZone() { return this.timezone; }
   setSpreadsheetTimeZone(value) { this.timezone = value; }
 }
@@ -181,13 +193,42 @@ assert.match(spreadsheet.getSheetByName("Attendance").getRange("A2").getFormula(
 assert.equal(spreadsheet.getSheetByName("_Raw_Attendance").hidden, true);
 assert.equal(spreadsheet.getSheetByName("Members").protections.length, 1);
 
+spreadsheet.getSheetByName("Schedule").getRange(2, 2, 999, 1).setValues(Array.from({ length: 999 }, () => [false]));
+spreadsheet.getSheetByName("Training_Types").getRange(2, 3, 999, 1).setValues(Array.from({ length: 999 }, () => [false]));
+spreadsheet.getSheetByName("_Messages").getRange(2, 2, 999, 1).setValues(Array.from({ length: 999 }, () => [false]));
+spreadsheet.getSheetByName("Schedule").getRange(2, 7).setValue("Owner note without a schedule ID");
+spreadsheet.getSheetByName("Schedule").getRange(3, 7).setFormula('=""');
+spreadsheet.getSheetByName("Schedule").maxRows = 1001;
+spreadsheet.getSheetByName("Training_Types").maxRows = 1001;
+spreadsheet.getSheetByName("_Messages").maxRows = 1001;
+spreadsheet.getSheetByName("Schedule").getRange(1001, 1, 1, 8).setValues([["DEMO_MON_1800", true, "MONDAY", "18:00", "19:00", "DEMO_STRENGTH", "Demo Evening Strength", "ALL"]]);
+spreadsheet.getSheetByName("Training_Types").getRange(1001, 1, 1, 4).setValues([["DEMO_STRENGTH", "Demo Strength", true, 10]]);
+spreadsheet.getSheetByName("_Messages").getRange(1001, 1, 1, 6).setValues([["DEMO_WELCOME", true, "Have a great demo session!", "DEMO_STRENGTH", "", 1]]);
+
 context.loadDemoData_();
 context.loadDemoData_();
 assert.equal(spreadsheet.getSheetByName("Members").getLastRow(), 2);
-assert.equal(spreadsheet.getSheetByName("Schedule").getLastRow(), 2);
-assert.equal(spreadsheet.getSheetByName("Training_Types").getLastRow(), 2);
-assert.equal(spreadsheet.getSheetByName("_Messages").getLastRow(), 2);
+assert.equal(spreadsheet.getSheetByName("Schedule").getRange(2, 7).getValue(), "Owner note without a schedule ID");
+assert.equal(spreadsheet.getSheetByName("Schedule").getRange(3, 7).getFormula(), '=""');
+assert.equal(spreadsheet.getSheetByName("Schedule").getRange(4, 1).getValue(), "DEMO_MON_1800");
+assert.equal(spreadsheet.getSheetByName("Training_Types").getRange(2, 1).getValue(), "DEMO_STRENGTH");
+assert.equal(spreadsheet.getSheetByName("_Messages").getRange(2, 1).getValue(), "DEMO_WELCOME");
+assert.equal(spreadsheet.getSheetByName("Schedule").getRange(1001, 1).getValue(), "");
+assert.equal(spreadsheet.getSheetByName("Training_Types").getRange(1001, 1).getValue(), "");
+assert.equal(spreadsheet.getSheetByName("_Messages").getRange(1001, 1).getValue(), "");
 assert.equal(context.runTemplateSetup().syntheticDataOnly, true);
+
+spreadsheet.getSheetByName("Attendance").getRange("A2").setFormula(context.LEGACY_ATTENDANCE_PROJECTION_FORMULA);
+context.setupTemplate_();
+assert.equal(spreadsheet.getSheetByName("Attendance").getRange("A2").getFormula(), context.ATTENDANCE_PROJECTION_FORMULA);
+
+const defaultSpreadsheet = new MockSpreadsheet();
+defaultSpreadsheet.insertSheet("Tabellenblatt1");
+const defaultContext = createContext(defaultSpreadsheet);
+vm.createContext(defaultContext);
+vm.runInContext(source, defaultContext);
+assert.equal(defaultContext.setupTemplate_().removedDefaultSheet, "Tabellenblatt1");
+assert.equal(defaultSpreadsheet.getSheetByName("Tabellenblatt1"), null);
 
 const webContext = createContext(null);
 vm.createContext(webContext);

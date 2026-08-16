@@ -19,6 +19,7 @@ function setupTemplate_(options) {
         createdSheets.push(definition.name);
       }
     });
+    var removedDefaultSheet = removeBlankDefaultSheet_(spreadsheet);
 
     applyTemplateValidations_(spreadsheet);
     applyTemplateFormats_(spreadsheet);
@@ -33,6 +34,7 @@ function setupTemplate_(options) {
       createdSheets: createdSheets,
       verifiedSheets: TEMPLATE_SHEETS.map(function (definition) { return definition.name; }),
       attendanceProjection: "protected_array_formula",
+      removedDefaultSheet: removedDefaultSheet,
     };
   } finally {
     lock.releaseLock();
@@ -85,6 +87,10 @@ function ensureAttendanceProjection_(spreadsheet) {
   var existingFormula = formulaCell.getFormula();
   var existingValue = formulaCell.getDisplayValue();
 
+  if (existingFormula === LEGACY_ATTENDANCE_PROJECTION_FORMULA) {
+    formulaCell.setFormula(ATTENDANCE_PROJECTION_FORMULA);
+    existingFormula = ATTENDANCE_PROJECTION_FORMULA;
+  }
   if (existingFormula && existingFormula !== ATTENDANCE_PROJECTION_FORMULA) {
     throw new Error("Attendance projection formula differs from schema version " + TEMPLATE_SCHEMA_VERSION + ". Run a documented migration.");
   }
@@ -94,6 +100,17 @@ function ensureAttendanceProjection_(spreadsheet) {
   if (!existingFormula) {
     formulaCell.setFormula(ATTENDANCE_PROJECTION_FORMULA);
   }
+}
+
+function removeBlankDefaultSheet_(spreadsheet) {
+  var templateNames = TEMPLATE_SHEETS.map(function (definition) { return definition.name; });
+  var defaultSheet = spreadsheet.getSheets().filter(function (sheet) {
+    return sheet.getSheetId() === 0 && templateNames.indexOf(sheet.getName()) === -1 && sheet.getLastRow() === 0 && sheet.getLastColumn() === 0;
+  })[0];
+  if (!defaultSheet) return "";
+  var name = defaultSheet.getName();
+  spreadsheet.deleteSheet(defaultSheet);
+  return name;
 }
 
 function ensureInternalMetadata_(spreadsheet, now) {

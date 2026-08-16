@@ -30,8 +30,25 @@ function loadDemoData_() {
 }
 
 function appendDemoRowIfMissing_(sheet, keyColumn, key, row) {
-  if (!findRowByValue_(sheet, keyColumn, key)) {
-    sheet.appendRow(row);
+  var existingRow = findRowByValue_(sheet, keyColumn, key);
+  var targetRow = 0;
+  var candidateCount = Math.max(0, sheet.getMaxRows() - 1);
+  var candidateRange = candidateCount ? sheet.getRange(2, 1, candidateCount, row.length) : null;
+  var candidates = candidateRange ? candidateRange.getValues() : [];
+  var candidateFormulas = candidateRange ? candidateRange.getFormulas() : [];
+  for (var candidateIndex = 0; candidateIndex < candidates.length; candidateIndex += 1) {
+    var values = candidates[candidateIndex];
+    var safe = values.every(function (value, index) {
+      return !candidateFormulas[candidateIndex][index] &&
+        (value === "" || value === null || (value === false && typeof row[index] === "boolean"));
+    });
+    if (safe) { targetRow = candidateIndex + 2; break; }
+  }
+  if (existingRow && (!targetRow || existingRow <= targetRow)) return;
+  if (!targetRow) { sheet.appendRow(row); return; }
+  sheet.getRange(targetRow, 1, 1, row.length).setValues([row]);
+  if (existingRow && existingRow !== targetRow) {
+    sheet.getRange(existingRow, 1, 1, row.length).setValues([row.map(function () { return ""; })]);
   }
 }
 

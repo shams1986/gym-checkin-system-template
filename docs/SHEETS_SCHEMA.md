@@ -6,6 +6,8 @@
 
 `loadDemoData_()` is separate and never runs during production setup. Both setup functions are run only by a maintainer from the Apps Script editor.
 
+On a new bound spreadsheet, setup removes only the untouched blank default sheet (`gid=0`). It never deletes a populated or additional owner sheet. The demo loader writes its known synthetic rows into the first safe row: all fields must be blank, except that a fixture's boolean fields may contain validation-generated `FALSE`. Blank-key rows containing other owner data are preserved.
+
 ## Setup entry points
 
 - `setupTemplate_()` creates/verifies the schema and preserves the spreadsheet's existing timezone.
@@ -53,7 +55,7 @@ Deployment IDs and credentials are not stored in owner-readable sheets.
 
 ## Attendance projection decision
 
-`Attendance!A2` contains one protected `ARRAYFORMULA` selecting timestamp, member snapshot, training type/name, and training start from canonical `_Raw_Attendance` columns. The projection is read-only and updates automatically as Phase 4 appends canonical events.
+`Attendance!A2` contains one protected `ARRAYFORMULA` using `FILTER` to select timestamp, member snapshot, training type/name, and training start from canonical `_Raw_Attendance` columns. The projection is read-only and updates automatically as Phase 4 appends canonical events. Setup migrates the one known pre-Phase-8 projection formula to this corrected formula and rejects any other unexpected formula.
 
 Owners can filter through a filter view without changing canonical order. Direct range sorting/editing is blocked by protection. Reporting and admin queries in later phases must read `_Raw_Attendance`, not depend on the visual order of `Attendance`.
 
