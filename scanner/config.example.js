@@ -52,4 +52,3 @@ window.GYM_PUBLIC_CONFIG = Object.freeze({
     scannerUrl: "",
   },
 });
-

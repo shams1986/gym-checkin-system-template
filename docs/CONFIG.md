@@ -269,4 +269,3 @@ This second configuration uses the same keys and types while changing identity, 
 ```
 
 Neither sample depends on an AXIS name, URL, asset, member prefix, training type, or deployment identifier.
-

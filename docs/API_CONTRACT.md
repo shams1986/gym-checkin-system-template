@@ -116,4 +116,3 @@ These examples are normalized state objects. `ready`, `loading`, local `error`, 
 ## Access boundary
 
 The public API surface is limited to anonymous check-in and safe public scanner configuration. It must never route admin functions or return protected settings, sheet/Drive IDs, admin identities, credentials, internal state, or raw errors. Protected admin functions use the separate authentication boundary defined in `CONFIG.md`.
-

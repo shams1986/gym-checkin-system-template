@@ -11,4 +11,3 @@ Planned implementation begins in later phases:
 - Phase 7: attendance views and reports
 
 GitHub remains the source of truth. Do not bind this placeholder to a live Apps Script project, run `clasp push`, or deploy it. Any future live deployment requires the explicit user approval and checks in `DEPLOYMENT.md`.
-

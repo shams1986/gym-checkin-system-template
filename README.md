@@ -46,4 +46,3 @@ No scanner runtime, Apps Script backend, Google Sheets setup, admin UI, or card 
 - Treat public and protected configuration as separate trust boundaries.
 - Never commit secrets, credentials, real member data, or client deployment identifiers.
 - Never run `clasp push` or deploy to a live Apps Script or production system without explicit user approval.
-
