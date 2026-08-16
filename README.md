@@ -44,10 +44,18 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- SheetRepository.gs     Idempotent sheet setup helpers
 |   |-- Setup.gs               Workbook setup entry point
 |   |-- DemoData.gs            Separate synthetic demo loader
+|   |-- RuntimeRepository.gs   Validated runtime data/config access
+|   |-- MemberRepository.gs    Normalized member lookup
+|   |-- ScheduleService.gs     Authoritative schedule resolver
+|   |-- AttendanceRepository.gs Attendance/state/message/log persistence
+|   |-- ResponseFactory.gs     Frozen scanner response construction
+|   |-- CheckInService.gs      Lock-protected check-in transaction
+|   |-- WebApp.gs              Public JSON/JSONP check-in route
 |   `-- appsscript.json        Neutral V8 manifest
 `-- tests/
     |-- phase2-schema.test.js  Local Phase 2 contract checks
-    `-- phase2-setup.test.js   Mocked setup/idempotence checks
+    |-- phase2-setup.test.js   Mocked setup/idempotence checks
+    `-- phase4-checkin.test.js Backend transaction and route checks
 ```
 
 ## Current phase status
@@ -58,7 +66,9 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 3 — reusable scanner:** implemented with public configuration fallback, generalized QR parsing, all nine contract states, JSONP cleanup/timeout, feedback, responsive tablet layouts, PWA files, and fixtures. Completion requires automated/browser checks and Reviewer approval; camera/device/PWA installation checks remain manual.
 
-No check-in backend API, admin UI, card generator, or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
+**Phase 4 — template check-in backend:** implemented in source with normalized member lookup, status and category validation, timezone-aware schedule windows, per-session duplicate prevention under a short script lock, complete scanner responses, safe JSONP output, and bounded error logs. Local contract tests cover the deterministic transaction; concurrency, delayed responses, and live web-app behavior remain manual checks on an explicitly approved disposable development target.
+
+No admin UI, card generator, or reporting runtime is implemented yet. Those features remain in the later phases defined by `PRODUCT_PLAN.md`.
 
 ## Working rules
 

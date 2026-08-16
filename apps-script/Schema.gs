@@ -90,6 +90,19 @@ var TEMPLATE_DEFAULT_SETTINGS = Object.freeze([
   ["CheckinMinutesBeforeStart", "20", "Default check-in window before a session"],
   ["CheckinMinutesAfterStart", "30", "Default check-in window after a session starts"],
   ["DuplicatePolicy", "per_training_session", "Duplicate scope for the check-in backend"],
+  ["ScannerSuccessTitle", "Check-in complete", "Success result title"],
+  ["ScannerDuplicateTitle", "Already checked in", "Duplicate result title"],
+  ["ScannerNotFoundTitle", "Member not found", "Unknown member result title"],
+  ["ScannerInactiveTitle", "Membership inactive", "Inactive member result title"],
+  ["ScannerOutsideWindowTitle", "Check-in unavailable", "Outside-window result title"],
+  ["ScannerErrorTitle", "Please try again", "Safe backend error title"],
+  ["ScannerHelpText", "Ask a staff member for help.", "Fallback scanner guidance"],
+  ["ScannerSuccessSubtitle", "You're checked in for {trainingName}", "Success result subtitle; supports {trainingName}"],
+  ["ScannerDuplicateSubtitle", "Your attendance is already recorded", "Duplicate result subtitle"],
+  ["ScannerOutsideWindowSubtitle", "There is no eligible session right now.", "Outside-window result subtitle"],
+  ["ScannerSuccessColor", "#15803D", "Success result color"],
+  ["ScannerDuplicateColor", "#1D4ED8", "Duplicate result color"],
+  ["ScannerErrorColor", "#B91C1C", "Error result color"],
 ]);
 
 var ATTENDANCE_PROJECTION_FORMULA = "=ARRAYFORMULA(IF('_Raw_Attendance'!B2:B=\"\",\"\",{'_Raw_Attendance'!B2:B,'_Raw_Attendance'!C2:C,'_Raw_Attendance'!D2:D,'_Raw_Attendance'!E2:E,'_Raw_Attendance'!H2:H,'_Raw_Attendance'!I2:I,'_Raw_Attendance'!J2:J}))";
