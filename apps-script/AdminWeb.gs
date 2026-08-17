@@ -10,3 +10,7 @@ function renderAdminApp_() {
 function includeAdminFile_(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
+
+function includeAdminScript_(filename) {
+  return includeAdminFile_(filename).replace(/<\//g, "<\\/");
+}

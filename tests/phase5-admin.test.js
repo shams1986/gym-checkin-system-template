@@ -17,6 +17,7 @@ for (const screen of ["Dashboard", "Members", "Add member", "Edit member", "Sche
   assert.match(`${html}\n${client}`, new RegExp(screen, "i"));
 }
 assert.match(html, /accounts\.google\.com\/gsi\/client/);
+assert.match(html, /includeAdminScript_\("Admin\.js"\)/);
 assert.match(client, /google\.script\.run/);
 assert.match(`${client}\n${bundle}`, /Member ID will be generated automatically/);
 assert.match(client, /errorPanel\("Schedule could not be loaded", function \(\) \{ renderSchedule\(filters\); \}\)/);
@@ -30,6 +31,12 @@ assert.match(bundle, /allowedEmails\.indexOf\(email\)/);
 assert.match(bundle, /LockService\.getScriptLock\(\)/);
 assert.match(bundle, /member_id_format_locked/);
 assert.match(bundle, /schedule_overlap/);
+const includeContext = {
+  HtmlService: { createHtmlOutputFromFile: () => ({ getContent: () => "return '<div></div>';" }) },
+};
+vm.createContext(includeContext);
+vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminWeb.gs"), "utf8"), includeContext);
+assert.equal(includeContext.includeAdminScript_("Admin.js"), "return '<div><\\/div>';", "embedded admin JavaScript must not expose raw closing tags to HtmlService");
 const browserCallableFunctions = Array.from(bundle.matchAll(/^function ([A-Za-z0-9]+)\(/gm), (match) => match[1]).sort();
 assert.deepEqual(browserCallableFunctions, ["adminApi", "doGet", "runTemplateSetup"], "only authenticated/safe routes and the bound-editor-only setup wrapper may be browser-callable");
 assert.match(bundle, /function runTemplateSetup\(\)[\s\S]*if \(!SpreadsheetApp\.getActiveSpreadsheet\(\)\)[\s\S]*return loadDemoData_\(\)/, "manual setup wrapper must reject web-app/API contexts before mutation");
