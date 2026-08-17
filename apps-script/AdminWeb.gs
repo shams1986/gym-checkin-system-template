@@ -8,7 +8,7 @@ function renderAdminApp_() {
 }
 
 function includeAdminFile_(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+  return HtmlService.createTemplateFromFile(filename).getRawContent();
 }
 
 function includeAdminScript_(filename) {

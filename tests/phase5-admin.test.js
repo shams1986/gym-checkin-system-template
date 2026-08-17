@@ -32,7 +32,7 @@ assert.match(bundle, /LockService\.getScriptLock\(\)/);
 assert.match(bundle, /member_id_format_locked/);
 assert.match(bundle, /schedule_overlap/);
 const includeContext = {
-  HtmlService: { createHtmlOutputFromFile: () => ({ getContent: () => "return '<div></div>';" }) },
+  HtmlService: { createTemplateFromFile: () => ({ getRawContent: () => "return '<div></div>';" }) },
 };
 vm.createContext(includeContext);
 vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminWeb.gs"), "utf8"), includeContext);
