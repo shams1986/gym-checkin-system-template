@@ -2,16 +2,15 @@
 
 Phase 5 adds an authenticated owner interface at the Apps Script web-app route `?api=admin`. The source remains unbound and undeployed in this repository.
 
-## Authentication properties
+## Authentication property and deployment model
 
-The admin uses Google Identity Services in the browser and verifies every ID token server-side. Configure these Apps Script script properties only on a new, explicitly approved single-gym development or client project:
+The admin uses the Google account supplied by an Apps Script web-app deployment that executes as the accessing user. Every admin request reads `Session.getActiveUser().getEmail()` on the server and checks it against the protected allowlist. Configure this Apps Script script property only on a new, explicitly approved single-gym development or client project:
 
 | Property | Value |
 |---|---|
-| `ADMIN_GOOGLE_CLIENT_ID` | Google OAuth 2.0 web client ID created for that installation |
 | `ADMIN_ALLOWED_EMAILS` | JSON array of normalized owner emails, for example `["owner@example.invalid"]` |
 
-The OAuth client ID is public by design. The allowlist is protected and must never be placed in scanner configuration or committed client files. Add the exact deployed web-app origin required by Google Identity Services to that installation's OAuth client configuration. Do not reuse an AXIS OAuth client, deployment, allowlist, or spreadsheet.
+The allowlist is protected and must never be placed in scanner configuration or committed client files. Deploy the admin separately with **Execute as: User accessing the web app** and access restricted to the intended signed-in audience. Keep the anonymous scanner deployment separate and executing as its owner. Google Identity Services browser tokens and an OAuth web client are not required for the Apps Script admin page. Do not reuse an AXIS deployment, allowlist, or spreadsheet.
 
 ## Before any development deployment
 
@@ -19,15 +18,14 @@ The following resources would need to be created and explicitly confirmed before
 
 1. A disposable Google Sheet owned by the tester.
 2. A new spreadsheet-bound Apps Script project created for this template only.
-3. A Google Cloud OAuth 2.0 web client for the development web-app origin.
-4. The two script properties above, using synthetic test accounts/data only.
-5. A web-app deployment configured for the intended test access, with its project and deployment identifiers recorded for rollback.
+3. The script property above, using synthetic test accounts/data only.
+4. Separate scanner and admin web-app deployments, with their execution identities, access settings, and deployment identifiers recorded for rollback.
 
 Creating or documenting these resources does not authorize `clasp push` or deployment. Never point this source at AXIS or another live Apps Script project.
 
 ## Manual Phase 5 checks
 
-- Open `?api=admin` signed out and confirm no operational data appears.
+- Open the admin deployment signed out and confirm Google requires authentication before operational data appears.
 - Sign in with an email outside the allowlist and confirm reads and writes are rejected.
 - Sign in as an allowed owner and exercise Dashboard, Members, Member Detail, Schedule, and Settings navigation.
 - Test an empty workbook, member creation/editing, immutable generated IDs, activation/deactivation, and a simulated failed status change.

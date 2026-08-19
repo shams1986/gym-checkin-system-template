@@ -12,22 +12,24 @@ assert.doesNotThrow(() => new vm.Script(bundle, { filename: "phase5-apps-script-
 const client = fs.readFileSync(path.join(appsScript, "Admin.js.html"), "utf8");
 const html = fs.readFileSync(path.join(appsScript, "Admin.html"), "utf8");
 const css = fs.readFileSync(path.join(appsScript, "Admin.css.html"), "utf8");
+const authDocs = ["README.md", "apps-script/README.md", "docs/ADMIN_SETUP.md", "docs/CONFIG.md"].map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 assert.doesNotThrow(() => new vm.Script(client, { filename: "Admin.js" }));
 for (const screen of ["Dashboard", "Members", "Add member", "Edit member", "Schedule", "Settings"]) {
   assert.match(`${html}\n${client}`, new RegExp(screen, "i"));
 }
-assert.match(html, /accounts\.google\.com\/gsi\/client/);
+assert.doesNotMatch(html, /accounts\.google\.com\/gsi\/client|ADMIN_OAUTH_CLIENT_ID|google-signin/);
 assert.match(html, /includeAdminScript_\("Admin\.js"\)/);
 assert.match(client, /google\.script\.run/);
 assert.match(`${client}\n${bundle}`, /Member ID will be generated automatically/);
 assert.match(client, /errorPanel\("Schedule could not be loaded", function \(\) \{ renderSchedule\(filters\); \}\)/);
 assert.doesNotMatch(html, /sheet id|cache key|deployment id|callback name/i);
 assert.match(css, /@media\(max-width:600px\)/);
-assert.match(bundle, /function adminApi\(action, payload, identityToken\)/);
-assert.match(bundle, /UrlFetchApp\.fetch\("https:\/\/oauth2\.googleapis\.com\/tokeninfo/);
-assert.match(bundle, /claims\.aud/);
-assert.match(bundle, /claims\.email_verified/);
+assert.match(bundle, /function adminApi\(action, payload\)/);
+assert.match(bundle, /Session\.getActiveUser\(\)\.getEmail\(\)/);
 assert.match(bundle, /allowedEmails\.indexOf\(email\)/);
+assert.doesNotMatch(bundle, /oauth2\.googleapis\.com\/tokeninfo|ADMIN_GOOGLE_CLIENT_ID/);
+assert.doesNotMatch(authDocs, /ADMIN_GOOGLE_CLIENT_ID|Google (?:ID-)?token (?:verification|authorization)|Google-token authorization/i);
+assert.match(authDocs, /Session\.getActiveUser\(\)\.getEmail\(\)/);
 assert.match(bundle, /LockService\.getScriptLock\(\)/);
 assert.match(bundle, /member_id_format_locked/);
 assert.match(bundle, /schedule_overlap/);
@@ -42,18 +44,11 @@ assert.deepEqual(browserCallableFunctions, ["adminApi", "doGet", "runTemplateSet
 assert.match(bundle, /function runTemplateSetup\(\)[\s\S]*if \(!SpreadsheetApp\.getActiveSpreadsheet\(\)\)[\s\S]*return loadDemoData_\(\)/, "manual setup wrapper must reject web-app/API contexts before mutation");
 
 const properties = {
-  ADMIN_GOOGLE_CLIENT_ID: "client.example.apps.googleusercontent.com",
   ADMIN_ALLOWED_EMAILS: '["owner@example.invalid"]',
 };
-const cacheValues = new Map();
-let fetchCount = 0;
 let handlerCalls = 0;
-const claimsByToken = {
-  good: { iss: "https://accounts.google.com", aud: properties.ADMIN_GOOGLE_CLIENT_ID, email: "Owner@Example.invalid", email_verified: true, exp: Math.floor(Date.now() / 1000) + 3600 },
-  outsider: { iss: "https://accounts.google.com", aud: properties.ADMIN_GOOGLE_CLIENT_ID, email: "other@example.invalid", email_verified: true, exp: Math.floor(Date.now() / 1000) + 3600 },
-  wrongAudience: { iss: "https://accounts.google.com", aud: "wrong-client", email: "owner@example.invalid", email_verified: true, exp: Math.floor(Date.now() / 1000) + 3600 },
-};
-const actionNames = ["getDashboardData_", "listMembers_", "getMember_", "getMemberAttendance_", "getAttendance_", "getReportData_", "getMemberFormOptions_", "createMember_", "updateMember_", "setMemberStatus_", "listSchedule_", "createScheduleEntry_", "updateScheduleEntry_", "setScheduleStatus_", "deleteScheduleEntry_", "saveScheduleOrder_", "createTrainingType_", "updateTrainingType_", "deleteTrainingType_", "getAdminSettings_", "updateAdminSettings_", "testCardConfiguration_", "listBasicMessages_", "saveBasicMessage_", "deleteBasicMessage_", "listMemberCards_", "generateMemberCard_", "regenerateMemberCard_", "generateMissingMemberCards_"];
+let activeEmail = "";
+const actionNames = ["getAdminSession_", "getDashboardData_", "listMembers_", "getMember_", "getMemberAttendance_", "getAttendance_", "getReportData_", "getMemberFormOptions_", "createMember_", "updateMember_", "setMemberStatus_", "listSchedule_", "createScheduleEntry_", "updateScheduleEntry_", "setScheduleStatus_", "deleteScheduleEntry_", "saveScheduleOrder_", "createTrainingType_", "updateTrainingType_", "deleteTrainingType_", "getAdminSettings_", "updateAdminSettings_", "testCardConfiguration_", "listBasicMessages_", "saveBasicMessage_", "deleteBasicMessage_", "listMemberCards_", "generateMemberCard_", "regenerateMemberCard_", "generateMissingMemberCards_"];
 const context = {
   Object,
   Array,
@@ -62,8 +57,7 @@ const context = {
   Error,
   encodeURIComponent,
   PropertiesService: { getScriptProperties: () => ({ getProperty: (key) => properties[key] || "" }) },
-  CacheService: { getScriptCache: () => ({ get: (key) => cacheValues.get(key) || null, put: (key, value) => cacheValues.set(key, value) }) },
-  UrlFetchApp: { fetch: (url) => { fetchCount += 1; const token = decodeURIComponent(url.split("id_token=")[1]); const claims = claimsByToken[token]; return { getResponseCode: () => claims ? 200 : 401, getContentText: () => JSON.stringify(claims || {}) }; } },
+  Session: { getActiveUser: () => ({ getEmail: () => activeEmail }) },
   Utilities: { DigestAlgorithm: { SHA_256: "sha256" }, computeDigest: (_algorithm, token) => Array.from(String(token)).map((character) => character.charCodeAt(0)), getUuid: () => "request-id" },
   truncateRuntimeText_: (value, length) => String(value || "").slice(0, length),
   logCheckinFailure_: () => {},
@@ -73,29 +67,28 @@ vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminAuth.gs"), "utf8"), context);
 vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminApi.gs"), "utf8"), context);
 
-const anonymous = JSON.parse(JSON.stringify(context.adminApi("getDashboardData", {}, "")));
+const anonymous = JSON.parse(JSON.stringify(context.adminApi("getDashboardData", {})));
 assert.equal(anonymous.ok, false);
 assert.equal(anonymous.error.code, "unauthorized");
 assert.equal(handlerCalls, 0, "unauthorized calls must not reach handlers");
 
-const outsider = JSON.parse(JSON.stringify(context.adminApi("getDashboardData", {}, "outsider")));
+activeEmail = "other@example.invalid";
+const outsider = JSON.parse(JSON.stringify(context.adminApi("getDashboardData", {})));
 assert.equal(outsider.ok, false);
 assert.equal(outsider.error.code, "forbidden");
 assert.equal(handlerCalls, 0);
 
-const wrongAudience = JSON.parse(JSON.stringify(context.adminApi("getDashboardData", {}, "wrongAudience")));
-assert.equal(wrongAudience.ok, false);
-assert.equal(handlerCalls, 0);
-
-const authorized = JSON.parse(JSON.stringify(context.adminApi("getDashboardData", { date: "2026-08-17" }, "good")));
+activeEmail = "Owner@Example.invalid";
+const session = JSON.parse(JSON.stringify(context.adminApi("getAdminSession", {})));
+assert.equal(session.ok, true);
+assert.equal(session.data.email, "owner@example.invalid");
+const authorized = JSON.parse(JSON.stringify(context.adminApi("getDashboardData", { date: "2026-08-17" })));
 assert.equal(authorized.ok, true);
 assert.equal(authorized.data.email, "owner@example.invalid");
 assert.equal(handlerCalls, 1);
-const fetchesAfterFirstSuccess = fetchCount;
-assert.equal(context.adminApi("listMembers", {}, "good").ok, true);
-assert.equal(fetchCount, fetchesAfterFirstSuccess, "verified token should use the short server cache");
+assert.equal(context.adminApi("listMembers", {}).ok, true);
 
-const unsupported = JSON.parse(JSON.stringify(context.adminApi("internalHelper", {}, "good")));
+const unsupported = JSON.parse(JSON.stringify(context.adminApi("internalHelper", {})));
 assert.equal(unsupported.ok, false);
 assert.equal(unsupported.error.code, "unsupported_action");
 assert.equal(handlerCalls, 2, "unsupported actions must not reach handlers");

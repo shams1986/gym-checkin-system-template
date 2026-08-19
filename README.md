@@ -54,7 +54,7 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 |   |-- ResponseFactory.gs     Frozen scanner response construction
 |   |-- CheckInService.gs      Lock-protected check-in transaction
 |   |-- WebApp.gs              Public JSON/JSONP check-in route
-|   |-- AdminAuth.gs           Google token and owner authorization
+|   |-- AdminAuth.gs           Active Apps Script user allowlist authorization
 |   |-- AdminApi.gs            Allowlisted protected admin RPC boundary
 |   |-- Admin*Service.gs       Owner dashboard and management operations
 |   |-- Admin.html             Owner application shell
@@ -84,7 +84,7 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 4 — template check-in backend:** implemented in source with normalized member lookup, status and category validation, timezone-aware schedule windows, per-session duplicate prevention under a short script lock, complete scanner responses, safe JSONP output, and bounded error logs. Local contract tests cover the deterministic transaction; concurrency, delayed responses, and live web-app behavior remain manual checks on an explicitly approved disposable development target.
 
-**Phase 5 — owner/admin panel MVP:** implemented in source with Google-token authorization, an explicit action allowlist, Dashboard, Members, Add/Edit Member, Member Detail, Schedule, Settings, and basic-message workflows. Live identity and Apps Script acceptance checks require the disposable resources documented in `docs/ADMIN_SETUP.md`.
+**Phase 5 — owner/admin panel MVP:** implemented in source with Apps Script active-user authorization against a protected owner allowlist, an explicit action allowlist, Dashboard, Members, Add/Edit Member, Member Detail, Schedule, Settings, and basic-message workflows. Live identity and Apps Script acceptance checks require the separate admin deployment documented in `docs/ADMIN_SETUP.md`.
 
 **Phase 6 — member card workflow:** implemented in source with configurable Google Slides placeholders, Drive output, QR formats, single/regenerate/confirmed batch actions, fault-isolated card state, and admin card status/actions. Live Slides/Drive acceptance checks require the disposable resources documented in `docs/CARD_TEMPLATE.md`.
 

@@ -1,4 +1,5 @@
 var ADMIN_ACTIONS = Object.freeze({
+  getAdminSession: getAdminSession_,
   getDashboardData: getDashboardData_,
   listMembers: listMembers_,
   getMember: getMember_,
@@ -30,10 +31,10 @@ var ADMIN_ACTIONS = Object.freeze({
   generateMissingMemberCards: generateMissingMemberCards_,
 });
 
-function adminApi(action, payload, identityToken) {
+function adminApi(action, payload) {
   var requestId = Utilities.getUuid();
   try {
-    var admin = authorizeAdmin_(identityToken);
+    var admin = authorizeAdmin_();
     var handler = ADMIN_ACTIONS[String(action || "")];
     if (!handler) {
       throw adminError_("unsupported_action", "That admin action is not available.");
@@ -52,4 +53,8 @@ function adminApi(action, payload, identityToken) {
       },
     };
   }
+}
+
+function getAdminSession_(payload, admin) {
+  return { email: admin.email };
 }

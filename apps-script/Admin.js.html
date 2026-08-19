@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  var state = { token: "", email: "", route: "dashboard", memberId: "", members: null, schedule: null, settings: null };
+  var state = { email: "", route: "dashboard", memberId: "", members: null, schedule: null, settings: null };
   var view = document.getElementById("view");
 
   function escapeHtml(value) { return String(value == null ? "" : value).replace(/[&<>'"]/g, function (character) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]; }); }
@@ -8,7 +8,7 @@
     return new Promise(function (resolve, reject) {
       google.script.run.withSuccessHandler(function (response) {
         if (response && response.ok) resolve(response.data); else reject(response && response.error ? response.error : { code: "system_error", message: "The request failed." });
-      }).withFailureHandler(function () { reject({ code: "transport_error", message: "The admin service could not be reached." }); }).adminApi(action, payload || {}, state.token);
+      }).withFailureHandler(function () { reject({ code: "transport_error", message: "The admin service could not be reached." }); }).adminApi(action, payload || {});
     });
   }
   function loading() { view.innerHTML = '<div class="loading">Loading…</div>'; }
@@ -238,15 +238,20 @@
   function clearFieldErrors(form) { form.querySelectorAll(".field-error").forEach(function (node) { node.textContent = ""; }); }
   function showFieldErrors(form, fields) { Object.keys(fields || {}).forEach(function (name) { var node = form.querySelector('[data-error-for="' + CSS.escape(name) + '"]'); if (node) node.textContent = fields[name]; }); }
 
-  function initializeSignIn() {
-    if (!window.ADMIN_OAUTH_CLIENT_ID) { document.getElementById("auth-error").textContent = "Admin access is not configured. Set the Apps Script admin properties first."; return; }
-    if (!window.google || !google.accounts) { setTimeout(initializeSignIn, 100); return; }
-    google.accounts.id.initialize({ client_id: window.ADMIN_OAUTH_CLIENT_ID, callback: function (credential) { state.token = credential.credential; var encoded = credential.credential.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"); while (encoded.length % 4) encoded += "="; var claims = JSON.parse(atob(encoded)); state.email = claims.email || ""; document.getElementById("admin-email").textContent = state.email; document.getElementById("auth-view").hidden = true; document.getElementById("admin-shell").hidden = false; route("dashboard"); } });
-    google.accounts.id.renderButton(document.getElementById("google-signin"), { theme: "outline", size: "large", width: 300 });
+  async function initializeAdmin() {
+    try {
+      var session = await api("getAdminSession", {});
+      state.email = session.email || "";
+      document.getElementById("admin-email").textContent = state.email;
+      document.getElementById("auth-view").hidden = true;
+      document.getElementById("admin-shell").hidden = false;
+      route("dashboard");
+    } catch (error) {
+      document.getElementById("auth-error").textContent = error.message || "Admin access could not be verified.";
+    }
   }
   document.querySelectorAll(".nav-link").forEach(function (button) { button.onclick = function () { route(button.dataset.route); }; });
   document.getElementById("menu-toggle").onclick = function () { document.querySelector(".sidebar").classList.toggle("open"); };
   document.querySelectorAll("[data-dialog-close]").forEach(function (button) { button.onclick = function () { document.getElementById("editor-dialog").close(); }; });
-  document.getElementById("sign-out").onclick = function () { state.token = ""; google.accounts.id.disableAutoSelect(); document.getElementById("admin-shell").hidden = true; document.getElementById("auth-view").hidden = false; };
-  initializeSignIn();
+  initializeAdmin();
 })();

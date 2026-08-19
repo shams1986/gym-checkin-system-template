@@ -4,7 +4,6 @@
   <base target="_top">
   <meta charset="utf-8">
   <title>Gym Check-in Admin</title>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style><?!= includeAdminFile_("Admin.css"); ?></style>
 </head>
 <body>
@@ -13,8 +12,7 @@
       <div class="brand-mark">GC</div>
       <p class="eyebrow">Owner workspace</p>
       <h1>Gym Check-in Admin</h1>
-      <p>Sign in with an authorized Google account to manage this gym.</p>
-      <div id="google-signin"></div>
+      <p>Checking your authorized Google account…</p>
       <p id="auth-error" class="form-error" role="alert"></p>
     </section>
   </div>
@@ -31,7 +29,7 @@
         <button data-route="schedule" class="nav-link">Schedule</button>
         <button data-route="settings" class="nav-link">Settings</button>
       </nav>
-      <div class="sidebar-footer"><span id="admin-email"></span><button id="sign-out" class="text-button">Sign out</button></div>
+      <div class="sidebar-footer"><span id="admin-email"></span></div>
     </aside>
     <main>
       <header class="mobile-header"><button id="menu-toggle" aria-label="Toggle navigation">Menu</button><strong id="mobile-title">Dashboard</strong></header>
@@ -49,7 +47,6 @@
     </form>
   </dialog>
 
-  <script>window.ADMIN_OAUTH_CLIENT_ID = <?!= oauthClientIdJson ?>;</script>
   <script><?!= includeAdminScript_("Admin.js"); ?></script>
 </body>
 </html>

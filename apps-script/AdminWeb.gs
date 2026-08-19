@@ -1,6 +1,5 @@
 function renderAdminApp_() {
   var template = HtmlService.createTemplateFromFile("Admin");
-  template.oauthClientIdJson = JSON.stringify(getConfiguredAdminClientId_());
   return template.evaluate()
     .setTitle("Gym Check-in Admin")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT)
