@@ -97,7 +97,8 @@ Remaining Phase 8 manual QA is physical phone/tablet camera scanning, a real gen
 ## Working rules
 
 - Use `PRODUCT_PLAN.md` one phase at a time.
-- Use Fast Build Mode: a focused Developer change must receive a read-only Reviewer approval before commit or push.
+- Use autonomous Fast Build Mode: execute the current prompt directly, then have the focused diff approved by read-only Reviewer Mode before delivery.
+- After approval, commit and push without another confirmation; for Apps Script work, sync/update the existing Phase 8 development target when appropriate.
 - Treat public and protected configuration as separate trust boundaries.
 - Never commit secrets, credentials, real member data, or client deployment identifiers.
-- Never run `clasp push` or deploy to a live Apps Script or production system without explicit user approval.
+- Phase 8 Google resources are non-production development targets. Stop before creating/modifying a real client instance or affecting AXIS production.
