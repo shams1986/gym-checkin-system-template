@@ -90,7 +90,9 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 7 — attendance views and reports:** implemented in source with protected seven-field attendance views, timezone-aware filters, member history, pagination, export-friendly pages, and monthly top/low-attendance summaries. Live acceptance checks remain for an explicitly approved disposable Apps Script/Sheet target.
 
-Phase 8 demo-data acceptance testing remains pending as defined by `PRODUCT_PLAN.md`.
+**Phase 8 — development verification:** development milestone reached; the phase remains open for the manual acceptance checks below. The development scanner and separate admin Apps Script deployments are live, and development Sheet setup/schema verification passed. Admin authentication now uses an Apps Script deployment that executes as the accessing user instead of browser Google Identity Services. The current development admin deployment is restricted to **Only myself** (`salahadin35@gmail.com`): the allowed owner can open the dashboard, while non-owner and incognito access is blocked before dashboard access or Google permission consent.
+
+Remaining Phase 8 manual QA is physical phone/tablet camera scanning, a real generated QR-card scan, and design of a future multi-admin/client access architecture. After those acceptance checks pass, the next stage is **Phase 9 — first client instance from the template**.
 
 ## Working rules
 

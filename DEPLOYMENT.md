@@ -64,6 +64,15 @@ Confirm the intended Apps Script project and deployment configuration before run
 - Commit and push Apps Script changes before running `clasp push`.
 - Do not deploy unrelated or uncommitted changes.
 
+## Phase 8 development milestone
+
+- The development scanner deployment is live and remains separate from the live development admin deployment.
+- Admin authentication was changed from browser Google Identity Services to a separate Apps Script deployment that executes as the accessing user and checks the protected owner allowlist server-side.
+- The current development admin deployment is restricted to **Only myself** (`salahadin35@gmail.com`). This lets the allowed owner open the dashboard while blocking non-owner and incognito access before dashboard access or Google permission consent.
+- Development Sheet setup and schema verification passed.
+- Phase 8 remains open for physical phone/tablet camera scanning, a real QR-card scan, and a future multi-admin/client access architecture.
+- After those Phase 8 acceptance checks pass, the next stage is Phase 9: create the first client instance from the template without converting this repository into a client-specific or multi-tenant product.
+
 ## Rollback
 
 For ordinary template source changes, identify the last approved commit and create a normal Git revert commit; do not rewrite shared history or force-push. Review and push the revert through the same Developer/Reviewer workflow.
