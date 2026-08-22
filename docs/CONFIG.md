@@ -65,7 +65,7 @@ Secrets and credentials belong in Apps Script properties or the deployment platf
 
 ## Admin authentication decision
 
-The protected admin application must use a separate Apps Script web-app deployment that executes as the accessing user. The installation stores the owner allowlist as a JSON array in the `ADMIN_ALLOWED_EMAILS` Apps Script property. `Session.getActiveUser().getEmail()` and allowlist membership are checked server-side on every protected admin call. The anonymous scanner deployment remains separate, grants no admin authority, and cannot route internal helpers. See `ADMIN_SETUP.md` for setup and acceptance checks.
+The protected admin application must use a separate Apps Script web-app deployment that executes as the accessing user. The installation stores the owner allowlist as a JSON array in the `ADMIN_ALLOWED_EMAILS` Apps Script property. `Session.getActiveUser().getEmail()` and allowlist membership are checked server-side on every protected admin call. The anonymous Apps Script backend deployment remains separate, grants no admin authority, and cannot route internal helpers. The scanner camera UI runs on a static HTTPS host. See `ADMIN_SETUP.md` for setup and acceptance checks.
 
 Admin authentication is a frozen architectural decision in Phase 1; implementation and unauthorized/authorized tests belong to Phase 5. No admin write endpoint may be exposed before that enforcement exists.
 

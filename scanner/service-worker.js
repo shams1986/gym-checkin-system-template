@@ -1,4 +1,4 @@
-const CACHE_NAME = "gym-checkin-template-v1";
+const CACHE_NAME = "gym-checkin-template-v2";
 const SHELL_FILES = [
   "./",
   "./index.html",

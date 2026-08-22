@@ -7,9 +7,11 @@ function doGet(event) {
   var callback = String(parameters.callback || "");
   var response;
 
-  if (!api && !callback) {
-    return renderScannerApp_();
-  }
+  if (!api && !callback) return createPublicOutput_({
+    service: "gym-checkin-backend",
+    scannerUrl: "https://shams1986.github.io/gym-checkin-system-template/",
+    routes: { config: "?api=config", checkin: "?api=checkin&id=<member-id>" },
+  }, "");
 
   if (callback && !isSafeJsonpCallback_(callback)) {
     response = createScannerResponse_("error", "invalid_payload", {}, {});

@@ -4,13 +4,13 @@ Phase 5 adds an authenticated owner interface at the Apps Script web-app route `
 
 ## Authentication property and deployment model
 
-The admin uses the Google account supplied by an Apps Script web-app deployment that executes as the accessing user. Every admin request reads `Session.getActiveUser().getEmail()` on the server and checks it against the protected allowlist. Configure this Apps Script script property only on a new, explicitly approved single-gym development or client project:
+The admin uses the Google account supplied by an Apps Script web-app deployment that executes as the accessing user. Every admin request reads `Session.getActiveUser().getEmail()` on the server and checks it against the protected allowlist. It is separate from both the static HTTPS scanner frontend and the anonymous Apps Script backend/API deployment. Configure this Apps Script script property only on a new, explicitly approved single-gym development or client project:
 
 | Property | Value |
 |---|---|
 | `ADMIN_ALLOWED_EMAILS` | JSON array of normalized owner emails, for example `["owner@example.invalid"]` |
 
-The allowlist is protected and must never be placed in scanner configuration or committed client files. Deploy the admin separately with **Execute as: User accessing the web app** and access restricted to the intended signed-in audience. Keep the anonymous scanner deployment separate and executing as its owner. Google Identity Services browser tokens and an OAuth web client are not required for the Apps Script admin page. Do not reuse an AXIS deployment, allowlist, or spreadsheet.
+The allowlist is protected and must never be placed in scanner configuration or committed client files. Deploy the admin separately with **Execute as: User accessing the web app** and access restricted to the intended signed-in audience. Keep the anonymous backend deployment separate and executing as its owner. Host the camera scanner on static HTTPS rather than either Apps Script deployment. Google Identity Services browser tokens and an OAuth web client are not required for the Apps Script admin page. Do not reuse an AXIS deployment, allowlist, or spreadsheet.
 
 ## Before any development deployment
 
@@ -19,7 +19,7 @@ The following resources would need to be created and explicitly confirmed before
 1. A disposable Google Sheet owned by the tester.
 2. A new spreadsheet-bound Apps Script project created for this template only.
 3. The script property above, using synthetic test accounts/data only.
-4. Separate scanner and admin web-app deployments, with their execution identities, access settings, and deployment identifiers recorded for rollback.
+4. Separate anonymous-backend and admin web-app deployments, plus a static HTTPS scanner host, with their access settings and deployment identifiers/URL recorded for rollback.
 
 Creating or documenting these resources does not authorize `clasp push` or deployment. Never point this source at AXIS or another live Apps Script project.
 
@@ -32,6 +32,6 @@ Creating or documenting these resources does not authorize `clasp push` or deplo
 - Create overlapping and non-overlapping schedule entries and confirm the overlap error leaves the form open.
 - Save settings, reload, and confirm presentation changes persist while technical sheets/identifiers remain hidden.
 - Test dashboard behavior with and without attendance.
-- Verify the anonymous scanner check-in and public configuration routes still work independently.
+- Verify the anonymous backend check-in and public configuration routes still work independently from the static scanner frontend.
 
 QR generation is intentionally deferred to Phase 6. The Phase 5 card configuration check validates whether IDs are present but does not access Drive or Slides.

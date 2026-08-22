@@ -8,7 +8,7 @@ This is a new, non-production project. It is not the AXIS production repository,
 
 The planned MVP has four boundaries:
 
-1. **Scanner/PWA:** a static, tablet-friendly QR scanner with safe public branding and display configuration.
+1. **Scanner/PWA:** a tablet-friendly QR scanner hosted on a normal static HTTPS origin (GitHub Pages for Phase 8), never Apps Script HtmlService.
 2. **Public Apps Script API:** anonymous check-in and public-scanner-configuration routes with a stable machine-readable response contract.
 3. **Protected admin application:** authenticated owner workflows for members, schedules, settings, attendance, and cards.
 4. **Google Sheets and Drive:** the single gym's operational data store and generated card files. Internal sheets and integration identifiers stay protected.
@@ -90,7 +90,7 @@ The backend is authoritative for member status, schedule resolution, check-in wi
 
 **Phase 7 — attendance views and reports:** implemented in source with protected seven-field attendance views, timezone-aware filters, member history, pagination, export-friendly pages, and monthly top/low-attendance summaries. Live acceptance checks remain for an explicitly approved disposable Apps Script/Sheet target.
 
-**Phase 8 — development verification:** development milestone reached; the phase remains open for the manual acceptance checks below. The development scanner and separate admin Apps Script deployments are live, and development Sheet setup/schema verification passed. Admin authentication now uses an Apps Script deployment that executes as the accessing user instead of browser Google Identity Services. The current development admin deployment is restricted to **Only myself** (`salahadin35@gmail.com`): the allowed owner can open the dashboard, while non-owner and incognito access is blocked before dashboard access or Google permission consent.
+**Phase 8 — development verification:** the scanner frontend has been separated from Apps Script and prepared for `https://shams1986.github.io/gym-checkin-system-template/`; the anonymous Apps Script deployment remains the config/check-in backend, while admin remains a separate restricted Apps Script deployment. Development Sheet setup/schema verification passed. The phase remains open for Pages availability and physical camera/QR acceptance checks. Admin authentication uses an Apps Script deployment that executes as the accessing user. The current development admin deployment is restricted to **Only myself** (`salahadin35@gmail.com`): the allowed owner can open the dashboard, while non-owner and incognito access is blocked before dashboard access or Google permission consent.
 
 Remaining Phase 8 manual QA is physical phone/tablet camera scanning, a real generated QR-card scan, and design of a future multi-admin/client access architecture. After those acceptance checks pass, the next stage is **Phase 9 — first client instance from the template**.
 

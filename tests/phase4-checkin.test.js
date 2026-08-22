@@ -14,7 +14,6 @@ const runtimeFiles = [
   "AttendanceRepository.gs",
   "ResponseFactory.gs",
   "CheckInService.gs",
-  "ScannerWeb.gs",
   "WebApp.gs",
 ];
 
@@ -219,10 +218,10 @@ assert.equal(sheets._Raw_Attendance.rows.length, 3, "rejected results must not w
 
 assert.equal(context.isSafeJsonpCallback_("scannerCallback_1"), true);
 assert.equal(context.isSafeJsonpCallback_("alert(1)"), false);
-const scannerPage = context.doGet({ parameter: {} });
-assert.equal(scannerPage.kind, "html");
-assert.equal(scannerPage.template, "Scanner");
-assert.equal(JSON.parse(scannerPage.config).schemaVersion, 1);
+const backendDescriptor = context.doGet({ parameter: {} });
+assert.equal(backendDescriptor.mimeType, "json");
+assert.equal(JSON.parse(backendDescriptor.text).service, "gym-checkin-backend");
+assert.match(JSON.parse(backendDescriptor.text).scannerUrl, /^https:\/\//);
 const publicConfig = context.doGet({ parameter: { api: "config" } });
 assert.equal(publicConfig.mimeType, "json");
 assert.equal(JSON.parse(publicConfig.text).schemaVersion, 1);

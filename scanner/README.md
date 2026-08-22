@@ -2,9 +2,20 @@
 
 This directory contains the Phase 3 reusable scanner/PWA. It has no gym schedule, member data, protected identifiers, or backend logic.
 
+## Hosting boundary
+
+The scanner is a static PWA and must be served from a normal HTTPS origin. Apps Script HtmlService runs in a Google iframe and is not a supported camera host. Apps Script remains the JSON/JSONP backend, and the authenticated admin remains a separate Apps Script deployment.
+
+Phase 8 development uses:
+
+- Scanner: `https://shams1986.github.io/gym-checkin-system-template/`
+- Backend: `https://script.google.com/macros/s/AKfycbzg66rhaUPnaq_noiWHv_p9RG50geiUcQOdfcJsrCQ6CvVWmcaPZWOdl2js6kbd9ct6/exec`
+
+GitHub Actions publishes this directory at the Pages site root. `config.js` is the Phase 8 public deployment config; `config.example.js` remains the neutral reusable example.
+
 ## Configure locally
 
-Copy `config.example.js` to `config.js` and change only safe public values. The checked-in `config.js` is a neutral demo configuration with an empty endpoint, so scans fail safely until a later development backend is explicitly configured.
+For another installation, copy the shape in `config.example.js` and change only safe public values, including its own static scanner URL and Apps Script API URL. Never point a client or local test at the Phase 8 or AXIS backend.
 
 Changing the public config updates the visible gym name, logo, colors, text, reset delays, feedback choices, preferred camera, and endpoint without editing `app.js` or `core.mjs`. The core sanitizes config values and falls back to neutral defaults if the file is missing or malformed.
 
@@ -42,4 +53,4 @@ Use a disposable local/development endpoint and the fixtures in `tests/fixtures/
 5. JSONP response, script error, exact timeout, late callback, and automatic reset.
 6. Refresh, cached fallback, and PWA installation metadata.
 
-Do not point this scanner at AXIS, a client endpoint, or any live Apps Script deployment for testing.
+Use only the explicitly authorized Phase 8 development backend for this repository's deployment checks. Do not point local experiments at AXIS, a client endpoint, or any production Apps Script deployment.

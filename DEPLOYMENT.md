@@ -20,19 +20,25 @@ Phase 1 is repository scaffolding only. A maintainer may clone the repository, r
 
 Do not place real client IDs, credentials, member data, or live URLs in example files. Empty deployment-specific values are expected until an installation task provides a development or client target.
 
-Phase 5 admin testing additionally requires a development Sheet, spreadsheet-bound Apps Script project, a protected owner-email allowlist, and separate scanner/admin web-app deployments. The admin deployment must execute as the accessing user; the anonymous scanner deployment remains separate. The existing Phase 8 development resources are approved development targets. The exact resource and manual-test checklist is in `docs/ADMIN_SETUP.md`; never reuse AXIS or client-production identifiers for template testing.
+Phase 5 admin testing additionally requires a development Sheet, spreadsheet-bound Apps Script project, a protected owner-email allowlist, and separate public-backend/admin web-app deployments. The admin deployment must execute as the accessing user; the anonymous Apps Script backend deployment remains separate. The scanner camera UI is never hosted by Apps Script. The existing Phase 8 development resources are approved development targets. The exact resource and manual-test checklist is in `docs/ADMIN_SETUP.md`; never reuse AXIS or client-production identifiers for template testing.
 
 Phase 6 card testing also requires a neutral development Slides template and Drive output folder shared with the web-app execution account. Configure their IDs only in the protected development settings and follow `docs/CARD_TEMPLATE.md`.
 
 ## Autonomous development mode
 
-For tasks in this template repository, proceed without additional confirmation for normal file changes, tests, reviewed commits, GitHub pushes, `clasp push` to the bound Phase 8 development Apps Script project, updates to existing Phase 8 development deployments, and use of existing Phase 8 development Google resources. Verify the target before deployment and keep the scanner/admin deployment roles separate.
+For tasks in this template repository, proceed without additional confirmation for normal file changes, tests, reviewed commits, GitHub pushes, `clasp push` to the bound Phase 8 development Apps Script project, updates to existing Phase 8 development deployments, and use of existing Phase 8 development Google resources. Verify the target before deployment and keep the public backend/admin deployment roles separate.
 
 Stop when Google or another platform requires the user to complete a permission interaction, when a credential/resource is missing, when a product choice is genuinely ambiguous, or before any real client-instance or AXIS production action. Phase 8 development resources are non-production; real client and AXIS resources are not autonomous targets.
 
-## Frontend changes
+## Scanner frontend: static HTTPS hosting
 
-The frontend consists of the root-level scanner and PWA files. After reviewing and testing a change:
+The camera-capable frontend is the PWA under `scanner/`. It must run on a normal secure static origin, not inside Apps Script HtmlService or a `googleusercontent.com` iframe. GitHub Pages is the Phase 8 development host. The workflow `.github/workflows/deploy-scanner-pages.yml` publishes the contents of `scanner/` at the site root after a push to `main`.
+
+- Scanner frontend: `https://shams1986.github.io/gym-checkin-system-template/`
+- Scanner backend/API: `https://script.google.com/macros/s/AKfycbzg66rhaUPnaq_noiWHv_p9RG50geiUcQOdfcJsrCQ6CvVWmcaPZWOdl2js6kbd9ct6/exec`
+- Admin: the separate restricted Apps Script deployment documented in `docs/ADMIN_SETUP.md`
+
+The checked-in Phase 8 `scanner/config.js` calls the Apps Script backend through the existing JSONP contract. After reviewing and testing a frontend change:
 
 ```sh
 git status
@@ -59,7 +65,7 @@ cd ..
 git status
 ```
 
-When files under `scanner/` change, regenerate the Apps Script scanner shell with `node scripts/build-apps-script-scanner.mjs` before review. The scanner deployment root (`/exec`) serves that generated shell; `?api=config` and `?api=checkin&id=...` remain explicit public API routes.
+The anonymous Apps Script deployment is a backend only. Its root returns a small JSON service descriptor; `?api=config` and `?api=checkin&id=...` remain the public API routes. Do not copy or generate the scanner PWA into HtmlService.
 
 Confirm that the binding is the Phase 8 development Apps Script project before running `clasp push`; no additional user confirmation is required for that target.
 
@@ -74,11 +80,11 @@ Confirm that the binding is the Phase 8 development Apps Script project before r
 
 ## Phase 8 development milestone
 
-- The development scanner deployment is live and remains separate from the live development admin deployment.
+- The Phase 8 scanner frontend is prepared for GitHub Pages. The anonymous Apps Script deployment remains the scanner backend/API and is separate from the live development admin deployment.
 - Admin authentication was changed from browser Google Identity Services to a separate Apps Script deployment that executes as the accessing user and checks the protected owner allowlist server-side.
 - The current development admin deployment is restricted to **Only myself** (`salahadin35@gmail.com`). This lets the allowed owner open the dashboard while blocking non-owner and incognito access before dashboard access or Google permission consent.
 - Development Sheet setup and schema verification passed.
-- Phase 8 remains open for physical phone/tablet camera scanning, a real QR-card scan, and a future multi-admin/client access architecture.
+- Phase 8 remains open for confirming the Pages deployment, physical phone/tablet camera permission, a real QR-card scan against the development backend, PWA installation, and a future multi-admin/client access architecture.
 - After those Phase 8 acceptance checks pass, the next stage is Phase 9: create the first client instance from the template without converting this repository into a client-specific or multi-tenant product.
 
 ## Rollback

@@ -10,9 +10,7 @@ const app = read("scanner/app.js");
 const core = read("scanner/core.mjs");
 const css = read("scanner/styles.css");
 const manifest = JSON.parse(read("scanner/manifest.json"));
-const scannerWeb = read("apps-script/ScannerWeb.gs");
 const webApp = read("apps-script/WebApp.gs");
-const generatedScannerJs = read("apps-script/Scanner.js.html");
 
 ["camera", "screen", "gym-logo", "gym-name", "title", "member-name", "training-name", "subtitle", "message", "camera-status", "sound-hint", "retry-camera"].forEach((id) => {
   assert.match(html, new RegExp(`id=["']${id}["']`));
@@ -27,7 +25,7 @@ assert.match(css, /prefers-reduced-motion/);
 
 assert.doesNotMatch(app, /title[^\n]*indexOf|includes\([^\n]*title/i);
 assert.doesNotMatch(`${app}\n${core}`, /CHECKIN_REMINDER|Training_Schedule|MONDAY|TUESDAY|WEDNESDAY/);
-assert.doesNotMatch(`${html}\n${app}\n${core}`, /AXIS|AJJ|script\.google\.com/i);
+assert.doesNotMatch(`${html}\n${app}\n${core}`, /AXIS|AJJ/i);
 assert.match(core, /JSONP_TIMEOUT_MS = 20000/);
 assert.match(core, /function normalizeBackendState/);
 assert.match(app, /preferredCamera: config\.scanner\.behavior\.preferredCamera/);
@@ -50,11 +48,12 @@ function shape(value) {
 }
 
 assert.deepEqual(shape(loadConfig("scanner/config.js")), shape(loadConfig("scanner/config.example.js")));
-assert.equal(loadConfig("scanner/config.js").integration.checkInEndpoint, "");
-assert.doesNotThrow(() => new vm.Script(generatedScannerJs, { filename: "Scanner.js" }));
-assert.match(webApp, /if \(!api && !callback\) \{\s*return renderScannerApp_\(\)/);
-assert.match(scannerWeb, /getPublicScannerConfig_\(\)/);
-assert.match(scannerWeb, /function includeScannerScript_/);
-assert.ok(scannerWeb.includes('replace(/<\\//g, "<\\\\/")'));
+const deployedConfig = loadConfig("scanner/config.js");
+assert.match(deployedConfig.integration.checkInEndpoint, /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/);
+assert.equal(deployedConfig.integration.scannerUrl, "https://shams1986.github.io/gym-checkin-system-template/");
+assert.doesNotMatch(webApp, /renderScannerApp_|HtmlService|Scanner\.html/);
+assert.match(webApp, /service:\s*"gym-checkin-backend"/);
+assert.match(webApp, /api === "config"/);
+assert.match(webApp, /api !== "checkin"/);
 
 console.log("Scanner static, responsive, and config-shape checks passed.");
