@@ -5,6 +5,8 @@ const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
 const appsScript = path.join(root, "apps-script");
+const manifest = JSON.parse(fs.readFileSync(path.join(appsScript, "appsscript.json"), "utf8"));
+assert.deepEqual(manifest.webapp, { executeAs: "USER_ACCESSING", access: "MYSELF" }, "admin deployment must remain owner-only and execute as the accessing user");
 const gsFiles = fs.readdirSync(appsScript).filter((file) => file.endsWith(".gs")).sort();
 const bundle = gsFiles.map((file) => fs.readFileSync(path.join(appsScript, file), "utf8")).join("\n");
 assert.doesNotThrow(() => new vm.Script(bundle, { filename: "phase5-apps-script-bundle.gs" }));
