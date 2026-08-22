@@ -115,29 +115,40 @@ function releaseCardGenerationLease_(memberId, token) {
 function createMemberCard_(member, config, existing, regenerate) {
   var memberId = normalizeMemberId_(member.MemberID);
   var copiedFile = null;
+  var stage = "configuration";
   try {
     var values = cardTemplateValues_(member, config);
+    stage = "template access";
     var templateFile = DriveApp.getFileById(config.templateId);
+    stage = "output folder access";
     var outputFolder = DriveApp.getFolderById(config.outputFolderId);
+    stage = "template copy";
     copiedFile = templateFile.makeCopy(formatCardFileName_(config.fileNameFormat, values), outputFolder);
+    stage = "Slides open";
     var presentation = SlidesApp.openById(copiedFile.getId());
+    stage = "text placeholder replacement";
     replaceCardText_(presentation, config, values);
-    replaceCardQrPlaceholder_(presentation, config.qrPlaceholder, fetchCardQrBlob_(config.qrImageEndpoint, formatCardTokens_(config.qrValueFormat, values)));
+    stage = "QR image fetch";
+    var qrBlob = fetchCardQrBlob_(config.qrImageEndpoint, formatCardTokens_(config.qrValueFormat, values));
+    stage = "QR placeholder replacement";
+    replaceCardQrPlaceholder_(presentation, config.qrPlaceholder, qrBlob);
+    stage = "Slides save";
     presentation.saveAndClose();
     var generatedAt = new Date();
     var generatedAtText = formatRuntimeInstant_(generatedAt, config.timezone);
+    stage = "card state update";
     var card = saveCardGenerationSuccess_({ memberId: memberId, _rowNumber: member._rowNumber }, { fileId: copiedFile.getId(), url: copiedFile.getUrl(), generatedAt: generatedAt, templateVersion: config.templateId + "@" + templateFile.getLastUpdated().toISOString() }, true);
     if (regenerate && existing && existing.CardFileID && String(existing.CardFileID) !== copiedFile.getId()) {
       try { DriveApp.getFileById(String(existing.CardFileID)).setTrashed(true); } catch (ignored) { /* New card remains valid if old-file cleanup is unavailable. */ }
     }
     return { memberId: memberId, status: "generated", url: card.url, generatedAt: generatedAtText, lastError: "" };
   } catch (error) {
+    var reportedError = error && error.adminCode ? error : adminError_("card_generation_failed", "Card generation failed during " + stage + ": " + String(error && error.message ? error.message : error));
     if (copiedFile) {
       try { copiedFile.setTrashed(true); } catch (ignoredCleanup) { /* Preserve the original failure. */ }
     }
-    try { saveCardGenerationFailure_(memberId, error, true); } catch (ignoredState) { /* Admin API logs the original failure. */ }
-    if (error.adminCode) throw error;
-    throw adminError_("card_generation_failed", "Card generation failed. Check the template, output folder, placeholders, and permissions.");
+    try { saveCardGenerationFailure_(memberId, reportedError, true); } catch (ignoredState) { /* Admin API logs the reported failure. */ }
+    throw reportedError;
   }
 }
 
@@ -165,8 +176,8 @@ function cardTemplateValues_(member, config) {
 }
 
 function replaceCardText_(presentation, config, values) {
-  [[config.gymNamePlaceholder, values.gymName], [config.firstNamePlaceholder, values.firstName], [config.lastNamePlaceholder, values.lastName], [config.memberIdPlaceholder, values.memberId], [config.membershipPlaceholder, values.membership], [config.categoryPlaceholder, values.category]].forEach(function (replacement) {
-    if (replacement[0] && presentation.replaceAllText(replacement[0], replacement[1]) === 0) throw new Error("Card text placeholder was not found: " + replacement[0]);
+  [[config.gymNamePlaceholder, values.gymName, false], [config.firstNamePlaceholder, values.firstName, true], [config.lastNamePlaceholder, values.lastName, true], [config.memberIdPlaceholder, values.memberId, false], [config.membershipPlaceholder, values.membership, false], [config.categoryPlaceholder, values.category, false]].forEach(function (replacement) {
+    if (replacement[0] && presentation.replaceAllText(replacement[0], replacement[1]) === 0 && replacement[2]) throw new Error("Required card text placeholder was not found: " + replacement[0]);
   });
 }
 

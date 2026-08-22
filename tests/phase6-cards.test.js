@@ -20,6 +20,7 @@ let lastQrUrl = "";
 let lockAvailable = true;
 const scriptProperties = new Map();
 let uuidNumber = 0;
+let missingTextPlaceholders = new Set();
 
 function createPresentation() {
   const qrElement = {
@@ -37,7 +38,7 @@ function createPresentation() {
     insertImage: (blob, left, top, width, height) => insertedImages.push({ blob, left, top, width, height }),
   };
   return {
-    replaceAllText: (placeholder, value) => { replacements.push([placeholder, value]); return 1; },
+    replaceAllText: (placeholder, value) => { replacements.push([placeholder, value]); return missingTextPlaceholders.has(placeholder) ? 0 : 1; },
     getSlides: () => [slide],
     saveAndClose() {},
   };
@@ -122,6 +123,12 @@ assert.equal(insertedImages.length, 1);
 assert.ok(replacements.some(([placeholder, value]) => placeholder === "{{CATEGORY}}" && value === "Adult"));
 assert.ok(!replacements.some(([placeholder]) => placeholder === "{{GYM_NAME}}" || placeholder === "{{MEMBER_ID}}"), "optional visible placeholders may be omitted while the QR still encodes memberId");
 assert.equal(scriptProperties.size, 0, "the per-member lease is released after generation");
+missingTextPlaceholders = new Set(["{{MEMBERSHIP}}", "{{CATEGORY}}"]);
+assert.equal(context.regenerateMemberCard_({ memberId: "GYM0001" }).status, "generated", "configured optional placeholders may be absent from the neutral template");
+missingTextPlaceholders = new Set(["{{FIRST_NAME}}"]);
+assert.throws(() => context.regenerateMemberCard_({ memberId: "GYM0001" }), (error) => error.adminCode === "card_generation_failed" && /text placeholder replacement.*Required card text placeholder was not found: \{\{FIRST_NAME\}\}/.test(error.message));
+assert.match(failures.at(-1).message, /text placeholder replacement/);
+missingTextPlaceholders = new Set();
 const heldLease = context.acquireCardGenerationLease_("GYM0001");
 assert.throws(() => context.acquireCardGenerationLease_("GYM0001"), (error) => error.adminCode === "busy");
 context.releaseCardGenerationLease_("GYM0001", "wrong-token");
@@ -151,6 +158,7 @@ responseCode = 503;
 assert.throws(() => context.regenerateMemberCard_({ memberId: "GYM0001" }), (error) => error.adminCode === "card_generation_failed");
 assert.equal(copiedFiles.at(-1).trashed, true, "failed copied file is cleaned up");
 assert.equal(failures.at(-1).memberId, "GYM0001");
+assert.match(failures.at(-1).message, /QR image fetch.*HTTP 503/, "the protected card state receives the failing stage and provider exception");
 
 const batchMembers = [
   { MemberID: "GYM0001", Status: "Active" },
