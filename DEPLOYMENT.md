@@ -35,8 +35,10 @@ Stop when Google or another platform requires the user to complete a permission 
 The camera-capable frontend is the PWA under `scanner/`. It must run on a normal secure static origin, not inside Apps Script HtmlService or a `googleusercontent.com` iframe. GitHub Pages is the Phase 8 development host. The workflow `.github/workflows/deploy-scanner-pages.yml` publishes the contents of `scanner/` at the site root after a push to `main`.
 
 - Scanner frontend: `https://shams1986.github.io/gym-checkin-system-template/`
-- Scanner backend/API: `https://script.google.com/macros/s/AKfycbzlfmgf3dKyRTGbwwiUKd9evek9-9GeZxMnK4rbmakBrPqAGpJ4k8sSxi1j8ztIWK8p/exec`
-- Admin: the separate restricted Apps Script deployment documented in `docs/ADMIN_SETUP.md`
+- Scanner backend/API: `https://script.google.com/macros/s/AKfycbw-5EuEDUBPkzlkUD49-m1VIymrsBvOWmRmFP00N8PqtsE3XJnN9-oMKbYIcSK_WVNhIg/exec`
+- Admin: `https://script.google.com/macros/s/AKfycbwWzMCZ0h2jFSl2iZtY5uOg2R-E1_gm-9wKn17ZI3YKoq4YLBGIM46vMPIfmk6Jq-4-HA/exec?api=admin`
+
+The current Phase 8 development Apps Script project is bound to Sheet `1e8uPVxSSFp8UkJNjE8a6zza6zw9cPmfi0Mi5k5tZvFI` and uses the default Apps Script-managed GCP project (`GCP: Standard`). It was created from the Sheet through **Extensions → Apps Script** without selecting **Change project**. The backend and admin deployments above are versions 1 and 2 of that new project. Older Phase 8 resources are retained only for rollback/history and must not be modified.
 
 The checked-in Phase 8 `scanner/config.js` calls the Apps Script backend through the existing JSONP contract. After reviewing and testing a frontend change:
 

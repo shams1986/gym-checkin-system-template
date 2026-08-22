@@ -9,7 +9,7 @@ The scanner is a static PWA and must be served from a normal HTTPS origin. Apps 
 Phase 8 development uses:
 
 - Scanner: `https://shams1986.github.io/gym-checkin-system-template/`
-- Backend: `https://script.google.com/macros/s/AKfycbzlfmgf3dKyRTGbwwiUKd9evek9-9GeZxMnK4rbmakBrPqAGpJ4k8sSxi1j8ztIWK8p/exec`
+- Backend: `https://script.google.com/macros/s/AKfycbw-5EuEDUBPkzlkUD49-m1VIymrsBvOWmRmFP00N8PqtsE3XJnN9-oMKbYIcSK_WVNhIg/exec`
 
 GitHub Actions publishes this directory at the Pages site root. `config.js` is the Phase 8 public deployment config; `config.example.js` remains the neutral reusable example.
 

@@ -12,16 +12,18 @@ The admin uses the Google account supplied by an Apps Script web-app deployment 
 
 The allowlist is protected and must never be placed in scanner configuration or committed client files. Deploy the admin separately with **Execute as: User accessing the web app** and access restricted to the intended signed-in audience. Keep the anonymous backend deployment separate and executing as its owner. Host the camera scanner on static HTTPS rather than either Apps Script deployment. Google Identity Services browser tokens and an OAuth web client are not required for the Apps Script admin page. Do not reuse an AXIS deployment, allowlist, or spreadsheet.
 
-## Before any development deployment
+The current Phase 8 development admin is version 2 at `https://script.google.com/macros/s/AKfycbwWzMCZ0h2jFSl2iZtY5uOg2R-E1_gm-9wKn17ZI3YKoq4YLBGIM46vMPIfmk6Jq-4-HA/exec?api=admin`. It is separate from the public scanner backend and is restricted to the owner account configured in `ADMIN_ALLOWED_EMAILS`.
 
-The following resources would need to be created and explicitly confirmed before any `clasp push`:
+## Before creating another development or client deployment
+
+For any future instance, create and explicitly confirm the following resources before its first `clasp push`:
 
 1. A disposable Google Sheet owned by the tester.
 2. A new spreadsheet-bound Apps Script project created for this template only.
 3. The script property above, using synthetic test accounts/data only.
 4. Separate anonymous-backend and admin web-app deployments, plus a static HTTPS scanner host, with their access settings and deployment identifiers/URL recorded for rollback.
 
-Creating or documenting these resources does not authorize `clasp push` or deployment. Never point this source at AXIS or another live Apps Script project.
+Creating or documenting future resources does not by itself authorize their `clasp push` or deployment. The current Phase 8 development project above is the repository's approved non-production target; never point this source at AXIS or another live Apps Script project.
 
 ## Manual Phase 5 checks
 

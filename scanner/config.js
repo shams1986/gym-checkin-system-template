@@ -51,7 +51,7 @@ window.GYM_PUBLIC_CONFIG = Object.freeze({
     },
   },
   integration: {
-    checkInEndpoint: "https://script.google.com/macros/s/AKfycbzlfmgf3dKyRTGbwwiUKd9evek9-9GeZxMnK4rbmakBrPqAGpJ4k8sSxi1j8ztIWK8p/exec",
+    checkInEndpoint: "https://script.google.com/macros/s/AKfycbw-5EuEDUBPkzlkUD49-m1VIymrsBvOWmRmFP00N8PqtsE3XJnN9-oMKbYIcSK_WVNhIg/exec",
     scannerUrl: "https://shams1986.github.io/gym-checkin-system-template/",
   },
 });
