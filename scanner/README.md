@@ -13,6 +13,8 @@ Phase 8 development uses:
 
 GitHub Actions publishes this directory at the Pages site root. `config.js` is the Phase 8 public deployment config; `config.example.js` remains the neutral reusable example.
 
+Phase 8 frontend verification is complete: GitHub Pages is serving the scanner, its public config calls the Phase 8 Apps Script backend, and camera access passed a manual desktop test from the Pages URL. The former Apps Script HtmlService scanner UI was removed because camera capture must run on the normal static HTTPS origin. Remaining optional manual QA is a physical tablet/phone scan, a real QR-card success/duplicate flow, and PWA installation/offline refresh.
+
 ## Configure locally
 
 For another installation, copy the shape in `config.example.js` and change only safe public values, including its own static scanner URL and Apps Script API URL. Never point a client or local test at the Phase 8 or AXIS backend.

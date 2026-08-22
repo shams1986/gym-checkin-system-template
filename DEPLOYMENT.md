@@ -80,12 +80,13 @@ Confirm that the binding is the Phase 8 development Apps Script project before r
 
 ## Phase 8 development milestone
 
-- The Phase 8 scanner frontend is prepared for GitHub Pages. The anonymous Apps Script deployment remains the scanner backend/API and is separate from the live development admin deployment.
+- The Phase 8 scanner frontend is live on GitHub Pages at `https://shams1986.github.io/gym-checkin-system-template/` and calls the Phase 8 Apps Script backend/API. A manual desktop camera test from the Pages URL passed.
+- The obsolete Apps Script scanner UI was removed because camera access must not run inside Apps Script HtmlService. The anonymous Apps Script backend remains separate from the live development admin deployment.
 - Admin authentication was changed from browser Google Identity Services to a separate Apps Script deployment that executes as the accessing user and checks the protected owner allowlist server-side.
 - The current development admin deployment is restricted to **Only myself** (`salahadin35@gmail.com`). This lets the allowed owner open the dashboard while blocking non-owner and incognito access before dashboard access or Google permission consent.
 - Development Sheet setup and schema verification passed.
-- Phase 8 remains open for confirming the Pages deployment, physical phone/tablet camera permission, a real QR-card scan against the development backend, PWA installation, and a future multi-admin/client access architecture.
-- After those Phase 8 acceptance checks pass, the next stage is Phase 9: create the first client instance from the template without converting this repository into a client-specific or multi-tenant product.
+- Remaining optional manual QA is a physical phone/tablet scan, a real QR-card success/duplicate flow against the development backend, and PWA installation/offline refresh.
+- The next stage is Phase 9: create the first client instance from the template without converting this repository into a client-specific or multi-tenant product.
 
 ## Rollback
 
