@@ -14,6 +14,7 @@ const runtimeFiles = [
   "AttendanceRepository.gs",
   "ResponseFactory.gs",
   "CheckInService.gs",
+  "ScannerWeb.gs",
   "WebApp.gs",
 ];
 
@@ -142,9 +143,31 @@ function createHarness() {
       getUuid: () => `attendance-${++uuid}`,
     },
     LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock: () => {} }) },
+    getPublicScannerConfig_: () => ({
+      schemaVersion: 1,
+      identity: { name: "Demo Gym" },
+      branding: { logoUrl: "./assets/logo.svg", iconUrl: "./assets/icon.svg" },
+      integration: { checkInEndpoint: "https://example.invalid/exec" },
+    }),
     ContentService: {
       MimeType: { JSON: "json", JAVASCRIPT: "javascript" },
       createTextOutput: (text) => ({ text, setMimeType(mimeType) { this.mimeType = mimeType; return this; } }),
+    },
+    HtmlService: {
+      XFrameOptionsMode: { DEFAULT: "default" },
+      createTemplateFromFile: (name) => ({
+        getRawContent: () => `<${name}>`,
+        evaluate() {
+          return {
+            kind: "html",
+            template: name,
+            config: this.scannerConfigJson,
+            setTitle() { return this; },
+            setXFrameOptionsMode() { return this; },
+            addMetaTag() { return this; },
+          };
+        },
+      }),
     },
   };
   vm.createContext(context);
@@ -196,6 +219,16 @@ assert.equal(sheets._Raw_Attendance.rows.length, 3, "rejected results must not w
 
 assert.equal(context.isSafeJsonpCallback_("scannerCallback_1"), true);
 assert.equal(context.isSafeJsonpCallback_("alert(1)"), false);
+const scannerPage = context.doGet({ parameter: {} });
+assert.equal(scannerPage.kind, "html");
+assert.equal(scannerPage.template, "Scanner");
+assert.equal(JSON.parse(scannerPage.config).schemaVersion, 1);
+const publicConfig = context.doGet({ parameter: { api: "config" } });
+assert.equal(publicConfig.mimeType, "json");
+assert.equal(JSON.parse(publicConfig.text).schemaVersion, 1);
+const demoApi = context.doGet({ parameter: { api: "checkin", id: "DEMO0001" } });
+assert.equal(demoApi.mimeType, "json");
+assert.equal(JSON.parse(demoApi.text).result, "not_found");
 const jsonp = context.doGet({ parameter: { api: "checkin", id: "GYM-9999", callback: "scannerCallback" } });
 assert.equal(jsonp.mimeType, "javascript");
 assert.match(jsonp.text, /^scannerCallback\(\{/);

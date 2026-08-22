@@ -59,6 +59,8 @@ cd ..
 git status
 ```
 
+When files under `scanner/` change, regenerate the Apps Script scanner shell with `node scripts/build-apps-script-scanner.mjs` before review. The scanner deployment root (`/exec`) serves that generated shell; `?api=config` and `?api=checkin&id=...` remain explicit public API routes.
+
 Confirm that the binding is the Phase 8 development Apps Script project before running `clasp push`; no additional user confirmation is required for that target.
 
 ## Deployment rules

@@ -10,6 +10,9 @@ const app = read("scanner/app.js");
 const core = read("scanner/core.mjs");
 const css = read("scanner/styles.css");
 const manifest = JSON.parse(read("scanner/manifest.json"));
+const scannerWeb = read("apps-script/ScannerWeb.gs");
+const webApp = read("apps-script/WebApp.gs");
+const generatedScannerJs = read("apps-script/Scanner.js.html");
 
 ["camera", "screen", "gym-logo", "gym-name", "title", "member-name", "training-name", "subtitle", "message", "camera-status", "sound-hint", "retry-camera"].forEach((id) => {
   assert.match(html, new RegExp(`id=["']${id}["']`));
@@ -48,5 +51,10 @@ function shape(value) {
 
 assert.deepEqual(shape(loadConfig("scanner/config.js")), shape(loadConfig("scanner/config.example.js")));
 assert.equal(loadConfig("scanner/config.js").integration.checkInEndpoint, "");
+assert.doesNotThrow(() => new vm.Script(generatedScannerJs, { filename: "Scanner.js" }));
+assert.match(webApp, /if \(!api && !callback\) \{\s*return renderScannerApp_\(\)/);
+assert.match(scannerWeb, /getPublicScannerConfig_\(\)/);
+assert.match(scannerWeb, /function includeScannerScript_/);
+assert.ok(scannerWeb.includes('replace(/<\\//g, "<\\\\/")'));
 
 console.log("Scanner static, responsive, and config-shape checks passed.");

@@ -15,6 +15,7 @@ Current files:
 - `ResponseFactory.gs`: stable machine-readable scanner response construction
 - `CheckInService.gs`: lock-protected check-in transaction
 - `WebApp.gs`: public check-in route and safe JSON/JSONP output
+- `ScannerWeb.gs`, `Scanner.html`, `Scanner.css.html`, `Scanner.js.html`: Apps Script root-route scanner shell generated from `scanner/`
 - `AdminAuth.gs`: Apps Script active-user verification against the protected owner-email allowlist
 - `AdminApi.gs`: browser-callable admin RPC dispatcher and action allowlist
 - `AdminRepository.gs`: shared private admin data helpers
@@ -38,6 +39,8 @@ GitHub remains the source of truth. Do not bind this source to AXIS or a live cl
 Local contract coverage is in `tests/phase4-checkin.test.js`. It does not replace the Phase 4 manual checks on an explicitly approved disposable development Apps Script project and Sheet: open/close boundaries, category eligibility, concurrent requests, malformed callbacks, missing sheets, and scanner timeout behavior.
 
 Phase 5 authentication and UI setup are documented in `docs/ADMIN_SETUP.md`. The admin uses a separate web-app deployment that executes as the accessing user; no operational data or mutation is available until `adminApi` verifies `Session.getActiveUser().getEmail()` against the protected allowlist. The anonymous scanner deployment stays separate. Implementation handlers end in `_` and cannot be called directly through `google.script.run`.
+
+Before pushing scanner-source changes to Apps Script, run `node scripts/build-apps-script-scanner.mjs` from the repository root. CI-style checks can use `node scripts/build-apps-script-scanner.mjs --check` to ensure the generated HtmlService bundle matches the canonical files in `scanner/`.
 
 Apps Script treats trailing-underscore functions as private to server-side code. The scanner implementation, setup routine, and demo loader therefore use `checkIn_`, `setupTemplate_`, and `loadDemoData_`; browser clients cannot invoke them with `google.script.run` and the editor function picker does not list them.
 

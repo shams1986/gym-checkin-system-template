@@ -1,23 +1,28 @@
 function doGet(event) {
   var parameters = event && event.parameter ? event.parameter : {};
-  if (String(parameters.api || "") === "admin") {
+  var api = String(parameters.api || "");
+  if (api === "admin") {
     return renderAdminApp_();
   }
   var callback = String(parameters.callback || "");
   var response;
+
+  if (!api && !callback) {
+    return renderScannerApp_();
+  }
 
   if (callback && !isSafeJsonpCallback_(callback)) {
     response = createScannerResponse_("error", "invalid_payload", {}, {});
     return createPublicOutput_(response, "");
   }
 
-  if (String(parameters.api || "") === "config") {
+  if (api === "config") {
     try {
       response = getPublicScannerConfig_();
     } catch (error) {
       response = { schemaVersion: 1, error: "configuration_unavailable" };
     }
-  } else if (String(parameters.api || "") !== "checkin") {
+  } else if (api !== "checkin") {
     response = createScannerResponse_("error", "invalid_payload", {}, {});
   } else {
     response = checkIn_(parameters.id, {
