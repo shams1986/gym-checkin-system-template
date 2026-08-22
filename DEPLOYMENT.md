@@ -35,7 +35,7 @@ Stop when Google or another platform requires the user to complete a permission 
 The camera-capable frontend is the PWA under `scanner/`. It must run on a normal secure static origin, not inside Apps Script HtmlService or a `googleusercontent.com` iframe. GitHub Pages is the Phase 8 development host. The workflow `.github/workflows/deploy-scanner-pages.yml` publishes the contents of `scanner/` at the site root after a push to `main`.
 
 - Scanner frontend: `https://shams1986.github.io/gym-checkin-system-template/`
-- Scanner backend/API: `https://script.google.com/macros/s/AKfycbzg66rhaUPnaq_noiWHv_p9RG50geiUcQOdfcJsrCQ6CvVWmcaPZWOdl2js6kbd9ct6/exec`
+- Scanner backend/API: `https://script.google.com/macros/s/AKfycbzlfmgf3dKyRTGbwwiUKd9evek9-9GeZxMnK4rbmakBrPqAGpJ4k8sSxi1j8ztIWK8p/exec`
 - Admin: the separate restricted Apps Script deployment documented in `docs/ADMIN_SETUP.md`
 
 The checked-in Phase 8 `scanner/config.js` calls the Apps Script backend through the existing JSONP contract. After reviewing and testing a frontend change:
