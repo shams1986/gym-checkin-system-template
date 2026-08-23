@@ -38,10 +38,10 @@ assert.deepEqual(actualSheets, expectedSheets);
 assert.equal(context.TEMPLATE_SCHEMA_VERSION, 1);
 assert.deepEqual(Array.from(context.TEMPLATE_ENUMS.memberStatus), ["Active", "Inactive"]);
 assert.equal(context.TEMPLATE_SHEETS.filter((sheet) => sheet.visibility === "internal").length, 6);
-assert.match(context.ATTENDANCE_PROJECTION_FORMULA, /_Raw_Attendance'!B2:B/);
-assert.match(context.ATTENDANCE_PROJECTION_FORMULA, /_Raw_Attendance'!J2:J/);
-assert.match(context.ATTENDANCE_PROJECTION_FORMULA, /IFERROR\(FILTER/);
-assert.notEqual(context.ATTENDANCE_PROJECTION_FORMULA, context.LEGACY_ATTENDANCE_PROJECTION_FORMULA);
+const attendanceProjectionFormulas = Array.from(context.ATTENDANCE_PROJECTION_FORMULAS);
+assert.deepEqual(attendanceProjectionFormulas, ["B", "C", "D", "E", "H", "I", "J"].map((column) => `=ARRAYFORMULA('_Raw_Attendance'!${column}2:${column})`));
+assert.equal(attendanceProjectionFormulas.every((formula) => !/[,;{}\\]/.test(formula)), true, "projection formulas must not depend on locale-specific separators");
+assert.notEqual(context.LOCALE_SENSITIVE_ATTENDANCE_PROJECTION_FORMULA, context.LEGACY_ATTENDANCE_PROJECTION_FORMULA);
 
 const manifest = JSON.parse(fs.readFileSync(path.join(appsScript, "appsscript.json"), "utf8"));
 assert.deepEqual(manifest, {
@@ -49,6 +49,10 @@ assert.deepEqual(manifest, {
   dependencies: {},
   exceptionLogging: "STACKDRIVER",
   runtimeVersion: "V8",
+  webapp: {
+    executeAs: "USER_ACCESSING",
+    access: "MYSELF",
+  },
 });
 
 assert.match(source, /function setupTemplate_\(options\)/);

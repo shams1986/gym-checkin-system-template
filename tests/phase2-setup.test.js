@@ -189,7 +189,8 @@ const installationId = spreadsheet.getSheetByName("_Internal_Config").getRange(3
 const second = context.setupTemplate_();
 assert.equal(second.createdSheets.length, 0);
 assert.equal(spreadsheet.getSheetByName("_Internal_Config").getRange(3, 2).getValue(), installationId);
-assert.match(spreadsheet.getSheetByName("Attendance").getRange("A2").getFormula(), /ARRAYFORMULA/);
+assert.deepEqual(spreadsheet.getSheetByName("Attendance").getRange(2, 1, 1, 7).getFormulas()[0], Array.from(context.ATTENDANCE_PROJECTION_FORMULAS));
+assert.equal(Array.from(context.ATTENDANCE_PROJECTION_FORMULAS).every((formula) => !/[,;{}\\]/.test(formula)), true);
 assert.equal(spreadsheet.getSheetByName("_Raw_Attendance").hidden, true);
 assert.equal(spreadsheet.getSheetByName("Members").protections.length, 1);
 
@@ -218,9 +219,15 @@ assert.equal(spreadsheet.getSheetByName("Training_Types").getRange(1001, 1).getV
 assert.equal(spreadsheet.getSheetByName("_Messages").getRange(1001, 1).getValue(), "");
 assert.equal(context.runTemplateSetup().syntheticDataOnly, true);
 
+for (let column = 1; column <= 7; column += 1) spreadsheet.getSheetByName("Attendance").getRange(2, column).setFormula("");
 spreadsheet.getSheetByName("Attendance").getRange("A2").setFormula(context.LEGACY_ATTENDANCE_PROJECTION_FORMULA);
 context.setupTemplate_();
-assert.equal(spreadsheet.getSheetByName("Attendance").getRange("A2").getFormula(), context.ATTENDANCE_PROJECTION_FORMULA);
+assert.deepEqual(spreadsheet.getSheetByName("Attendance").getRange(2, 1, 1, 7).getFormulas()[0], Array.from(context.ATTENDANCE_PROJECTION_FORMULAS));
+
+for (let column = 1; column <= 7; column += 1) spreadsheet.getSheetByName("Attendance").getRange(2, column).setFormula("");
+spreadsheet.getSheetByName("Attendance").getRange("A2").setFormula(context.LOCALE_SENSITIVE_ATTENDANCE_PROJECTION_FORMULA);
+context.setupTemplate_();
+assert.deepEqual(spreadsheet.getSheetByName("Attendance").getRange(2, 1, 1, 7).getFormulas()[0], Array.from(context.ATTENDANCE_PROJECTION_FORMULAS));
 
 const defaultSpreadsheet = new MockSpreadsheet();
 defaultSpreadsheet.insertSheet("Tabellenblatt1");

@@ -83,23 +83,32 @@ function ensureDefaultSettings_(spreadsheet, timezone) {
 
 function ensureAttendanceProjection_(spreadsheet) {
   var attendance = spreadsheet.getSheetByName("Attendance");
-  var formulaCell = attendance.getRange("A2");
-  var existingFormula = formulaCell.getFormula();
-  var existingValue = formulaCell.getDisplayValue();
+  var projectionRange = attendance.getRange(2, 1, 1, ATTENDANCE_PROJECTION_FORMULAS.length);
+  var existingFormulas = projectionRange.getFormulas()[0];
+  var existingValues = projectionRange.getDisplayValues()[0];
+  var existingFormula = existingFormulas[0];
+  var isKnownSingleFormula = existingFormula === LEGACY_ATTENDANCE_PROJECTION_FORMULA || existingFormula === LOCALE_SENSITIVE_ATTENDANCE_PROJECTION_FORMULA;
+  var isCurrentProjection = ATTENDANCE_PROJECTION_FORMULAS.every(function (formula, index) { return existingFormulas[index] === formula; });
 
-  if (existingFormula === LEGACY_ATTENDANCE_PROJECTION_FORMULA) {
-    formulaCell.setFormula(ATTENDANCE_PROJECTION_FORMULA);
-    existingFormula = ATTENDANCE_PROJECTION_FORMULA;
+  if (isKnownSingleFormula && existingFormulas.slice(1).every(function (formula) { return !formula; })) {
+    setAttendanceProjectionFormulas_(attendance);
+    return;
   }
-  if (existingFormula && existingFormula !== ATTENDANCE_PROJECTION_FORMULA) {
+  if (existingFormulas.some(Boolean) && !isCurrentProjection) {
     throw new Error("Attendance projection formula differs from schema version " + TEMPLATE_SCHEMA_VERSION + ". Run a documented migration.");
   }
-  if (!existingFormula && existingValue !== "") {
+  if (!existingFormulas.some(Boolean) && existingValues.some(function (value) { return value !== ""; })) {
     throw new Error("Attendance contains manual data. Setup will not overwrite it; migrate it before continuing.");
   }
-  if (!existingFormula) {
-    formulaCell.setFormula(ATTENDANCE_PROJECTION_FORMULA);
+  if (!isCurrentProjection) {
+    setAttendanceProjectionFormulas_(attendance);
   }
+}
+
+function setAttendanceProjectionFormulas_(attendance) {
+  ATTENDANCE_PROJECTION_FORMULAS.forEach(function (formula, index) {
+    attendance.getRange(2, index + 1).setFormula(formula);
+  });
 }
 
 function removeBlankDefaultSheet_(spreadsheet) {

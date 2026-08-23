@@ -55,7 +55,7 @@ Deployment IDs and credentials are not stored in owner-readable sheets.
 
 ## Attendance projection decision
 
-`Attendance!A2` contains one protected `ARRAYFORMULA` using `FILTER` to select timestamp, member snapshot, training type/name, and training start from canonical `_Raw_Attendance` columns. The projection is read-only and updates automatically as Phase 4 appends canonical events. Setup migrates the one known pre-Phase-8 projection formula to this corrected formula and rejects any other unexpected formula.
+`Attendance!A2:G2` contains seven protected single-source `ARRAYFORMULA` projections selecting timestamp, member snapshot, training type/name, and training start from canonical `_Raw_Attendance` columns. Each formula has one argument and no array literal, so it does not depend on locale-specific function or array separators. The projection is read-only and updates automatically as Phase 4 appends canonical events. Setup migrates the known earlier single-formula projections and rejects any other unexpected formula.
 
 Owners can filter through a filter view without changing canonical order. Direct range sorting/editing is blocked by protection. Reporting and admin queries in later phases must read `_Raw_Attendance`, not depend on the visual order of `Attendance`.
 

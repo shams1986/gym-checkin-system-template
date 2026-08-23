@@ -145,7 +145,16 @@ var TEMPLATE_DEFAULT_SETTINGS = Object.freeze([
 ]);
 
 var LEGACY_ATTENDANCE_PROJECTION_FORMULA = "=ARRAYFORMULA(IF('_Raw_Attendance'!B2:B=\"\",\"\",{'_Raw_Attendance'!B2:B,'_Raw_Attendance'!C2:C,'_Raw_Attendance'!D2:D,'_Raw_Attendance'!E2:E,'_Raw_Attendance'!H2:H,'_Raw_Attendance'!I2:I,'_Raw_Attendance'!J2:J}))";
-var ATTENDANCE_PROJECTION_FORMULA = "=ARRAYFORMULA(IFERROR(FILTER({'_Raw_Attendance'!B2:B,'_Raw_Attendance'!C2:C,'_Raw_Attendance'!D2:D,'_Raw_Attendance'!E2:E,'_Raw_Attendance'!H2:H,'_Raw_Attendance'!I2:I,'_Raw_Attendance'!J2:J},'_Raw_Attendance'!B2:B<>\"\"),\"\"))";
+var LOCALE_SENSITIVE_ATTENDANCE_PROJECTION_FORMULA = "=ARRAYFORMULA(IFERROR(FILTER({'_Raw_Attendance'!B2:B,'_Raw_Attendance'!C2:C,'_Raw_Attendance'!D2:D,'_Raw_Attendance'!E2:E,'_Raw_Attendance'!H2:H,'_Raw_Attendance'!I2:I,'_Raw_Attendance'!J2:J},'_Raw_Attendance'!B2:B<>\"\"),\"\"))";
+var ATTENDANCE_PROJECTION_FORMULAS = Object.freeze([
+  "=ARRAYFORMULA('_Raw_Attendance'!B2:B)",
+  "=ARRAYFORMULA('_Raw_Attendance'!C2:C)",
+  "=ARRAYFORMULA('_Raw_Attendance'!D2:D)",
+  "=ARRAYFORMULA('_Raw_Attendance'!E2:E)",
+  "=ARRAYFORMULA('_Raw_Attendance'!H2:H)",
+  "=ARRAYFORMULA('_Raw_Attendance'!I2:I)",
+  "=ARRAYFORMULA('_Raw_Attendance'!J2:J)",
+]);
 
 function getTemplateSheetDefinition_(sheetName) {
   for (var index = 0; index < TEMPLATE_SHEETS.length; index += 1) {
