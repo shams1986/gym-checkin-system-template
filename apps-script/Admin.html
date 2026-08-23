@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <title>Gym Check-in Admin</title>
   <style><?!= includeAdminFile_("Admin.css"); ?></style>
+  <style>.row-error{color:var(--danger);font-size:12px;margin-top:6px;max-width:320px}.form-success{color:var(--success);min-height:1.4em;font-weight:700}.advanced-settings{margin-top:24px;border-top:1px solid var(--line);padding-top:18px}.advanced-settings summary{cursor:pointer;font-size:18px;font-weight:800}.helper-text{color:var(--muted);margin:8px 0 18px}.advanced-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}</style>
 </head>
 <body>
   <div id="auth-view" class="auth-shell">
@@ -43,7 +44,7 @@
       <header><div><p class="eyebrow" id="editor-eyebrow"></p><h2 id="editor-title"></h2></div><button type="button" data-dialog-close class="icon-button" aria-label="Close">×</button></header>
       <div id="editor-error" class="form-error" role="alert"></div>
       <div id="editor-fields" class="form-grid"></div>
-      <footer><button type="button" data-dialog-close class="button secondary">Cancel</button><button id="editor-secondary-action" type="button" class="button secondary" hidden>Save and generate card</button><button id="editor-save" value="default" class="button primary">Save</button></footer>
+      <footer><button type="button" data-dialog-close class="button secondary">Cancel</button><button id="editor-save" value="default" class="button secondary">Save</button><button id="editor-secondary-action" type="button" class="button primary" hidden>Save and generate card</button></footer>
     </form>
   </dialog>
 

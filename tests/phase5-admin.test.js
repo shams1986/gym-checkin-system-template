@@ -23,6 +23,17 @@ assert.doesNotMatch(html, /accounts\.google\.com\/gsi\/client|ADMIN_OAUTH_CLIENT
 assert.match(html, /includeAdminScript_\("Admin\.js"\)/);
 assert.match(client, /google\.script\.run/);
 assert.match(`${client}\n${bundle}`, /Member ID will be generated automatically/);
+assert.match(client, /Advanced settings are for setup and support only\./);
+assert.match(client, /<details class="advanced-settings">/);
+assert.match(client, /setBusy\(button, "Saving\.\.\."\)/);
+assert.match(client, /Generating PDF\.\.\./);
+assert.match(client, /Generate missing active cards/);
+assert.doesNotMatch(client, /Regenerate active cards/);
+assert.doesNotMatch(client, /<th>Generated<\/th>|<th>Last error<\/th>/);
+assert.match(client, /filters = filters \|\| \{ status: "ACTIVE" \}/);
+assert.match(client, /Applying\.\.\.|Refreshing\.\.\.|Exporting\.\.\./);
+assert.doesNotMatch(client, /querySelector\('button\[type="submit"\]\'\)/);
+assert.match(client, /save\.textContent = "Save"; secondaryAction\.textContent = "Save and generate card"/);
 assert.match(client, /errorPanel\("Schedule could not be loaded", function \(\) \{ renderSchedule\(filters\); \}\)/);
 assert.doesNotMatch(html, /sheet id|cache key|deployment id|callback name/i);
 assert.match(css, /@media\(max-width:600px\)/);
