@@ -134,10 +134,16 @@ function createMemberCard_(member, config, existing, regenerate) {
     var qrBlob = fetchCardQrBlob_(config.qrImageEndpoint, formatCardTokens_(config.qrValueFormat, values));
     stage = "QR placeholder replacement";
     replaceCardQrPlaceholder_(presentation, config.qrPlaceholder, qrBlob);
+    stage = "card page selection";
+    var generatedSlides = presentation.getSlides();
+    if (generatedSlides.length !== 1) throw new Error("Card template must contain exactly one slide");
+    var slideObjectId = generatedSlides[0].getObjectId();
     stage = "Slides save";
     presentation.saveAndClose();
-    stage = "PDF export";
-    var pdfBlob = copiedFile.getAs(MimeType.PDF).setName(ensurePdfFileName_(outputName));
+    stage = "card image export";
+    var cardImageBlob = fetchCardSlideJpeg_(copiedFile.getId(), slideObjectId);
+    stage = "card-sized PDF creation";
+    var pdfBlob = createCardPdfBlob_(cardImageBlob, ensurePdfFileName_(outputName));
     stage = "PDF output write";
     pdfFile = outputFolder.createFile(pdfBlob);
     stage = "temporary Slides cleanup";
@@ -231,4 +237,62 @@ function formatCardFileName_(format, values) {
 
 function ensurePdfFileName_(name) {
   return /\.pdf$/i.test(name) ? name : name + ".pdf";
+}
+
+function fetchCardSlideJpeg_(presentationId, slideObjectId) {
+  var url = "https://docs.google.com/presentation/d/" + encodeURIComponent(presentationId) + "/export/jpeg?pageid=" + encodeURIComponent(slideObjectId);
+  var response = UrlFetchApp.fetch(url, { headers: { Authorization: "Bearer " + ScriptApp.getOAuthToken() }, muteHttpExceptions: true });
+  if (response.getResponseCode() !== 200) throw new Error("Slides card image export returned HTTP " + response.getResponseCode());
+  var blob = response.getBlob();
+  if (String(blob.getContentType() || "").toLowerCase() !== "image/jpeg") throw new Error("Slides card image export did not return JPEG");
+  return blob;
+}
+
+function createCardPdfBlob_(jpegBlob, fileName) {
+  var jpegBytes = jpegBlob.getBytes();
+  var dimensions = readJpegDimensions_(jpegBytes);
+  var pageWidth = (54 / 25.4 * 72).toFixed(4);
+  var pageHeight = (96 / 25.4 * 72).toFixed(4);
+  var content = "q\n" + pageWidth + " 0 0 " + pageHeight + " 0 0 cm\n/Im0 Do\nQ\n";
+  var objects = [
+    pdfAsciiBytes_("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n"),
+    pdfAsciiBytes_("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n"),
+    pdfAsciiBytes_("3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pageWidth + " " + pageHeight + "] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>\nendobj\n"),
+    pdfAsciiBytes_("4 0 obj\n<< /Length " + pdfAsciiBytes_(content).length + " >>\nstream\n" + content + "endstream\nendobj\n"),
+    pdfAsciiBytes_("5 0 obj\n<< /Type /XObject /Subtype /Image /Width " + dimensions.width + " /Height " + dimensions.height + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + jpegBytes.length + " >>\nstream\n"),
+  ];
+  var bytes = pdfAsciiBytes_("%PDF-1.4\n");
+  var offsets = [0];
+  objects.forEach(function (objectBytes, index) {
+    offsets[index + 1] = bytes.length;
+    bytes = bytes.concat(objectBytes);
+    if (index === 4) bytes = bytes.concat(jpegBytes, pdfAsciiBytes_("\nendstream\nendobj\n"));
+  });
+  var xrefOffset = bytes.length;
+  var xref = "xref\n0 6\n0000000000 65535 f \n";
+  for (var objectNumber = 1; objectNumber <= 5; objectNumber += 1) xref += ("0000000000" + offsets[objectNumber]).slice(-10) + " 00000 n \n";
+  xref += "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xrefOffset + "\n%%EOF\n";
+  return Utilities.newBlob(bytes.concat(pdfAsciiBytes_(xref)), MimeType.PDF, fileName);
+}
+
+function readJpegDimensions_(bytes) {
+  var values = bytes.map(function (value) { return value < 0 ? value + 256 : value; });
+  if (values[0] !== 0xFF || values[1] !== 0xD8) throw new Error("Card image is not a valid JPEG");
+  var offset = 2;
+  var startOfFrameMarkers = [0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF];
+  while (offset + 8 < values.length) {
+    if (values[offset] !== 0xFF) { offset += 1; continue; }
+    var marker = values[offset + 1];
+    offset += 2;
+    if (marker === 0xD8 || marker === 0xD9) continue;
+    var segmentLength = values[offset] * 256 + values[offset + 1];
+    if (segmentLength < 2 || offset + segmentLength > values.length) break;
+    if (startOfFrameMarkers.indexOf(marker) !== -1) return { height: values[offset + 3] * 256 + values[offset + 4], width: values[offset + 5] * 256 + values[offset + 6] };
+    offset += segmentLength;
+  }
+  throw new Error("Card JPEG dimensions could not be read");
+}
+
+function pdfAsciiBytes_(text) {
+  return String(text).split("").map(function (character) { return character.charCodeAt(0); });
 }

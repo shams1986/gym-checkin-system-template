@@ -64,6 +64,7 @@ This sends the formatted QR value to that external service. A gym with stricter 
 
 - `Generate` refuses to overwrite an existing card; `Regenerate` explicitly creates a replacement.
 - Generation copies the Slides template temporarily, replaces text and QR placeholders, saves it, exports the result as PDF into `CardOutputFolderID`, and trashes the temporary Slides copy.
+- Like the AXIS card-output pattern, the finalized slide is rasterized before PDF creation. The one-page PDF uses a fixed 54 × 96 mm portrait media box matching the template's 9:16 aspect ratio, so the editable template keeps its existing dimensions while the delivered file opens at card/phone scale.
 - `_Card_State`, `Members.CardURL`, and admin **Open / download** links point to the generated PDF, never the editable temporary Slides copy.
 - The new PDF and `_Card_State` metadata are completed before an old regenerated output file is moved to trash.
 - A failed regeneration keeps the previous card link and records `generated_with_error` status.

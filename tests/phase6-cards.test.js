@@ -16,9 +16,11 @@ const savedCards = [];
 const failures = [];
 const oldFile = { trashed: false, setTrashed(value) { this.trashed = value; } };
 let responseCode = 200;
+let slideExportResponseCode = 200;
 let existingState = null;
 let fileNumber = 0;
 let lastQrUrl = "";
+let lastSlideExportUrl = "";
 let lockAvailable = true;
 const scriptProperties = new Map();
 let uuidNumber = 0;
@@ -39,6 +41,7 @@ function createPresentation() {
   const slide = {
     getPageElements: () => [qrElement],
     insertImage: (blob, left, top, width, height) => insertedImages.push({ blob, left, top, width, height }),
+    getObjectId: () => "card-slide-1",
   };
   return {
     replaceAllText: (placeholder, value) => { replacements.push([placeholder, value]); return missingTextPlaceholders.has(placeholder) ? 0 : 1; },
@@ -61,7 +64,11 @@ const context = {
   isFinite,
   LockService: { getDocumentLock: () => null, getScriptLock: () => ({ tryLock: () => lockAvailable, releaseLock() {} }) },
   PropertiesService: { getScriptProperties: () => ({ getProperty: (key) => scriptProperties.get(key) || null, setProperty: (key, value) => scriptProperties.set(key, value), deleteProperty: (key) => scriptProperties.delete(key) }) },
-  Utilities: { getUuid: () => `lease-${++uuidNumber}` },
+  Utilities: {
+    getUuid: () => `lease-${++uuidNumber}`,
+    newBlob: (bytes, mimeType, name) => ({ bytes, mimeType, name }),
+  },
+  ScriptApp: { getOAuthToken: () => "test-oauth-token" },
   adminString_: (value, length) => String(value == null ? "" : value).trim().slice(0, length),
   adminPage_: (value, fallback) => Number(value) || fallback,
   adminPageSize_: (value, fallback) => Number(value) || fallback,
@@ -101,9 +108,6 @@ const context = {
             trashed: false,
             getId() { return this.id; },
             setTrashed(value) { this.trashed = value; },
-            getAs(mimeType) {
-              return { mimeType, name: "", setName(value) { this.name = value; return this; } };
-            },
           };
           copiedFiles.push(file);
           return file;
@@ -113,7 +117,7 @@ const context = {
     getFolderById: (id) => ({
       id,
       createFile(blob) {
-        const file = { id: `pdf-file-${pdfFiles.length + 1}`, name: blob.name, mimeType: blob.mimeType, trashed: false, getId() { return this.id; }, getUrl() { return `https://drive.example.invalid/${this.id}.pdf`; }, setTrashed(value) { this.trashed = value; } };
+        const file = { id: `pdf-file-${pdfFiles.length + 1}`, name: blob.name, mimeType: blob.mimeType, bytes: blob.bytes, trashed: false, getId() { return this.id; }, getUrl() { return `https://drive.example.invalid/${this.id}.pdf`; }, setTrashed(value) { this.trashed = value; } };
         pdfFiles.push(file);
         return file;
       },
@@ -121,7 +125,18 @@ const context = {
   },
   MimeType: { PDF: "application/pdf" },
   SlidesApp: { PageElementType: { SHAPE: "SHAPE" }, openById: () => createPresentation() },
-  UrlFetchApp: { fetch: (url) => { lastQrUrl = url; return { getResponseCode: () => responseCode, getBlob: () => ({ getContentType: () => "image/png" }) }; } },
+  UrlFetchApp: {
+    fetch: (url, options) => {
+      if (url.includes("/export/jpeg")) {
+        lastSlideExportUrl = url;
+        assert.equal(options.headers.Authorization, "Bearer test-oauth-token");
+        const jpegBytes = [0xFF, 0xD8, 0xFF, 0xC0, 0x00, 0x11, 0x08, 0x06, 0x40, 0x03, 0x84, 0x03, 0x01, 0x11, 0x00, 0x02, 0x11, 0x00, 0x03, 0x11, 0x00, 0xFF, 0xD9];
+        return { getResponseCode: () => slideExportResponseCode, getBlob: () => ({ getContentType: () => "image/jpeg", getBytes: () => jpegBytes }) };
+      }
+      lastQrUrl = url;
+      return { getResponseCode: () => responseCode, getBlob: () => ({ getContentType: () => "image/png" }) };
+    },
+  },
   saveCardGenerationSuccess_: (_member, card) => { if (failStateWrite) throw new Error("injected card state write failure"); savedCards.push(card); return { url: card.url }; },
   saveCardGenerationFailure_: (memberId, error) => failures.push({ memberId, message: error.message }),
   formatRuntimeInstant_: (date) => date.toISOString().replace(".000Z", "+00:00"),
@@ -143,6 +158,11 @@ assert.equal(copiedFiles[0].name, "TEMP-GYM0001-Zoë - Demo-O'Example");
 assert.equal(copiedFiles[0].trashed, true, "successful generation trashes the temporary Slides copy");
 assert.equal(pdfFiles[0].name, "GYM0001-Zoë - Demo-O'Example.pdf");
 assert.equal(pdfFiles[0].mimeType, "application/pdf");
+const generatedPdfText = String.fromCharCode(...pdfFiles[0].bytes);
+assert.match(generatedPdfText, /^%PDF-1\.4/);
+assert.match(generatedPdfText, /\/MediaBox \[0 0 153\.0709 272\.1260\]/, "PDF uses a 54 x 96 mm portrait page");
+assert.match(generatedPdfText, /\/Count 1/, "PDF contains exactly one page");
+assert.match(lastSlideExportUrl, /\/export\/jpeg\?pageid=card-slide-1$/, "only the finalized card slide is rasterized");
 assert.equal(savedCards[0].fileId, pdfFiles[0].id, "card state stores the PDF file ID");
 assert.equal(generated.url, pdfFiles[0].getUrl(), "admin receives the PDF URL");
 assert.match(lastQrUrl, /https%3A%2F%2Fscanner\.example\.invalid%2Fcheckin%3Fid%3DGYM0001/);
