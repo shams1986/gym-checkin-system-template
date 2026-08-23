@@ -115,15 +115,17 @@ function releaseCardGenerationLease_(memberId, token) {
 function createMemberCard_(member, config, existing, regenerate) {
   var memberId = normalizeMemberId_(member.MemberID);
   var copiedFile = null;
+  var pdfFile = null;
   var stage = "configuration";
   try {
     var values = cardTemplateValues_(member, config);
+    var outputName = formatCardFileName_(config.fileNameFormat, values);
     stage = "template access";
     var templateFile = DriveApp.getFileById(config.templateId);
     stage = "output folder access";
     var outputFolder = DriveApp.getFolderById(config.outputFolderId);
     stage = "template copy";
-    copiedFile = templateFile.makeCopy(formatCardFileName_(config.fileNameFormat, values), outputFolder);
+    copiedFile = templateFile.makeCopy("TEMP-" + outputName, outputFolder);
     stage = "Slides open";
     var presentation = SlidesApp.openById(copiedFile.getId());
     stage = "text placeholder replacement";
@@ -134,21 +136,27 @@ function createMemberCard_(member, config, existing, regenerate) {
     replaceCardQrPlaceholder_(presentation, config.qrPlaceholder, qrBlob);
     stage = "Slides save";
     presentation.saveAndClose();
+    stage = "PDF export";
+    var pdfBlob = copiedFile.getAs(MimeType.PDF).setName(ensurePdfFileName_(outputName));
+    stage = "PDF output write";
+    pdfFile = outputFolder.createFile(pdfBlob);
+    stage = "temporary Slides cleanup";
+    copiedFile.setTrashed(true);
     var generatedAt = new Date();
     var generatedAtText = formatRuntimeInstant_(generatedAt, config.timezone);
     stage = "card state update";
-    var card = saveCardGenerationSuccess_({ memberId: memberId, _rowNumber: member._rowNumber }, { fileId: copiedFile.getId(), url: copiedFile.getUrl(), generatedAt: generatedAt, templateVersion: config.templateId + "@" + templateFile.getLastUpdated().toISOString() }, true);
-    if (regenerate && existing && existing.CardFileID && String(existing.CardFileID) !== copiedFile.getId()) {
+    var card = saveCardGenerationSuccess_({ memberId: memberId, _rowNumber: member._rowNumber }, { fileId: pdfFile.getId(), url: pdfFile.getUrl(), generatedAt: generatedAt, templateVersion: config.templateId + "@" + templateFile.getLastUpdated().toISOString() }, true);
+    if (regenerate && existing && existing.CardFileID && String(existing.CardFileID) !== pdfFile.getId()) {
       try { DriveApp.getFileById(String(existing.CardFileID)).setTrashed(true); } catch (ignored) { /* New card remains valid if old-file cleanup is unavailable. */ }
     }
     return { memberId: memberId, status: "generated", url: card.url, generatedAt: generatedAtText, lastError: "" };
   } catch (error) {
     var reportedError = error && error.adminCode ? error : adminError_("card_generation_failed", "Card generation failed during " + stage + ": " + String(error && error.message ? error.message : error));
-    if (copiedFile) {
-      try { copiedFile.setTrashed(true); } catch (ignoredCleanup) { /* Preserve the original failure. */ }
-    }
+    if (pdfFile) try { pdfFile.setTrashed(true); } catch (ignoredPdfCleanup) { /* Preserve the original failure. */ }
     try { saveCardGenerationFailure_(memberId, reportedError, true); } catch (ignoredState) { /* Admin API logs the reported failure. */ }
     throw reportedError;
+  } finally {
+    if (copiedFile) try { copiedFile.setTrashed(true); } catch (ignoredSlidesCleanup) { /* The primary result or failure remains authoritative. */ }
   }
 }
 
@@ -219,4 +227,8 @@ function formatCardTokens_(format, values) {
 
 function formatCardFileName_(format, values) {
   return formatCardTokens_(format, values).replace(/[\\/:*?"<>|\u0000-\u001F]+/g, "-").replace(/\s+/g, " ").trim().slice(0, 180) || values.memberId;
+}
+
+function ensurePdfFileName_(name) {
+  return /\.pdf$/i.test(name) ? name : name + ".pdf";
 }

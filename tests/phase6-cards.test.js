@@ -11,6 +11,8 @@ assert.doesNotThrow(() => new vm.Script(source, { filename: "CardService.gs" }))
 const replacements = [];
 const insertedImages = [];
 const copiedFiles = [];
+const pdfFiles = [];
+const savedCards = [];
 const failures = [];
 const oldFile = { trashed: false, setTrashed(value) { this.trashed = value; } };
 let responseCode = 200;
@@ -21,6 +23,7 @@ let lockAvailable = true;
 const scriptProperties = new Map();
 let uuidNumber = 0;
 let missingTextPlaceholders = new Set();
+let failStateWrite = false;
 
 function createPresentation() {
   const qrElement = {
@@ -92,17 +95,34 @@ const context = {
       return {
         getLastUpdated: () => new Date("2026-08-17T10:00:00Z"),
         makeCopy(name) {
-          const file = { id: `new-file-${++fileNumber}`, name, trashed: false, getId() { return this.id; }, getUrl() { return `https://drive.example.invalid/${this.id}`; }, setTrashed(value) { this.trashed = value; } };
+          const file = {
+            id: `temp-slides-${++fileNumber}`,
+            name,
+            trashed: false,
+            getId() { return this.id; },
+            setTrashed(value) { this.trashed = value; },
+            getAs(mimeType) {
+              return { mimeType, name: "", setName(value) { this.name = value; return this; } };
+            },
+          };
           copiedFiles.push(file);
           return file;
         },
       };
     },
-    getFolderById: (id) => ({ id }),
+    getFolderById: (id) => ({
+      id,
+      createFile(blob) {
+        const file = { id: `pdf-file-${pdfFiles.length + 1}`, name: blob.name, mimeType: blob.mimeType, trashed: false, getId() { return this.id; }, getUrl() { return `https://drive.example.invalid/${this.id}.pdf`; }, setTrashed(value) { this.trashed = value; } };
+        pdfFiles.push(file);
+        return file;
+      },
+    }),
   },
+  MimeType: { PDF: "application/pdf" },
   SlidesApp: { PageElementType: { SHAPE: "SHAPE" }, openById: () => createPresentation() },
   UrlFetchApp: { fetch: (url) => { lastQrUrl = url; return { getResponseCode: () => responseCode, getBlob: () => ({ getContentType: () => "image/png" }) }; } },
-  saveCardGenerationSuccess_: (_member, card) => ({ url: card.url }),
+  saveCardGenerationSuccess_: (_member, card) => { if (failStateWrite) throw new Error("injected card state write failure"); savedCards.push(card); return { url: card.url }; },
   saveCardGenerationFailure_: (memberId, error) => failures.push({ memberId, message: error.message }),
   formatRuntimeInstant_: (date) => date.toISOString().replace(".000Z", "+00:00"),
   listCardStatesByMember_: () => ({}),
@@ -113,11 +133,18 @@ vm.runInContext(source, context);
 
 assert.equal(context.formatCardTokens_("{scannerUrl}?id={memberId}", { scannerUrl: "https://scanner.invalid/", memberId: "GYM0001" }), "https://scanner.invalid/?id=GYM0001");
 assert.equal(context.formatCardFileName_("{memberId}-{firstName}", { memberId: "GYM0001", firstName: "A/B" }), "GYM0001-A-B");
+assert.equal(context.ensurePdfFileName_("GYM0001-Card"), "GYM0001-Card.pdf");
+assert.equal(context.ensurePdfFileName_("GYM0001-Card.PDF"), "GYM0001-Card.PDF");
 assert.throws(() => context.validateCardFormat_("{unknown}", false), (error) => error.adminCode === "card_not_configured");
 
 const generated = JSON.parse(JSON.stringify(context.generateMemberCard_({ memberId: "gym0001" })));
 assert.equal(generated.status, "generated");
-assert.equal(copiedFiles[0].name, "GYM0001-Zoë - Demo-O'Example");
+assert.equal(copiedFiles[0].name, "TEMP-GYM0001-Zoë - Demo-O'Example");
+assert.equal(copiedFiles[0].trashed, true, "successful generation trashes the temporary Slides copy");
+assert.equal(pdfFiles[0].name, "GYM0001-Zoë - Demo-O'Example.pdf");
+assert.equal(pdfFiles[0].mimeType, "application/pdf");
+assert.equal(savedCards[0].fileId, pdfFiles[0].id, "card state stores the PDF file ID");
+assert.equal(generated.url, pdfFiles[0].getUrl(), "admin receives the PDF URL");
 assert.match(lastQrUrl, /https%3A%2F%2Fscanner\.example\.invalid%2Fcheckin%3Fid%3DGYM0001/);
 assert.equal(insertedImages.length, 1);
 assert.ok(replacements.some(([placeholder, value]) => placeholder === "{{CATEGORY}}" && value === "Adult"));
@@ -153,6 +180,14 @@ lockAvailable = true;
 const regenerated = context.regenerateMemberCard_({ memberId: "GYM0001" });
 assert.equal(regenerated.status, "generated");
 assert.equal(oldFile.trashed, true, "old card is trashed only after replacement succeeds");
+
+oldFile.trashed = false;
+failStateWrite = true;
+assert.throws(() => context.regenerateMemberCard_({ memberId: "GYM0001" }), (error) => error.adminCode === "card_generation_failed" && /card state update/.test(error.message));
+assert.equal(pdfFiles.at(-1).trashed, true, "a PDF is trashed if its card-state write fails");
+assert.equal(copiedFiles.at(-1).trashed, true, "the temporary Slides copy is trashed if card-state writing fails");
+assert.equal(oldFile.trashed, false, "the previous card remains available if replacement state writing fails");
+failStateWrite = false;
 
 responseCode = 503;
 assert.throws(() => context.regenerateMemberCard_({ memberId: "GYM0001" }), (error) => error.adminCode === "card_generation_failed");

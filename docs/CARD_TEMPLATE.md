@@ -1,6 +1,6 @@
 # Google Slides member-card template
 
-Phase 6 generates one Google Slides file per member from a reusable, single-slide template. The repository does not contain or require a client-specific card design.
+Phase 6 generates one PDF file per member from a reusable, editable Google Slides template. The repository does not contain or require a client-specific card design.
 
 ## Create the neutral template
 
@@ -38,7 +38,7 @@ Text replacement supports names and categories with spaces, punctuation, and non
 
 ## QR value and filename formats
 
-`CardQrValueFormat` controls the value encoded in the QR. It must contain `{memberId}`. `CardFileNameFormat` controls the copied Slides filename. Both support:
+`CardQrValueFormat` controls the value encoded in the QR. It must contain `{memberId}`. `CardFileNameFormat` controls the generated PDF filename; `.pdf` is appended when omitted. Both support:
 
 - `{memberId}`
 - `{firstName}`
@@ -63,7 +63,9 @@ This sends the formatted QR value to that external service. A gym with stricter 
 ## Generation behavior
 
 - `Generate` refuses to overwrite an existing card; `Regenerate` explicitly creates a replacement.
-- The new Slides file and `_Card_State` metadata are completed before an old regenerated file is moved to trash.
+- Generation copies the Slides template temporarily, replaces text and QR placeholders, saves it, exports the result as PDF into `CardOutputFolderID`, and trashes the temporary Slides copy.
+- `_Card_State`, `Members.CardURL`, and admin **Open / download** links point to the generated PDF, never the editable temporary Slides copy.
+- The new PDF and `_Card_State` metadata are completed before an old regenerated output file is moved to trash.
 - A failed regeneration keeps the previous card link and records `generated_with_error` status.
 - Batch generation requires confirmation, defaults to active members, processes at most 25 cards per call, and continues after individual failures.
 - `_Card_State` stores the output file ID/link, generation timestamp, source template version, and last error. `Members.CardURL` mirrors the current link.
