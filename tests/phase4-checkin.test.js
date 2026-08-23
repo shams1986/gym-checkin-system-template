@@ -13,6 +13,7 @@ const runtimeFiles = [
   "ScheduleService.gs",
   "AttendanceRepository.gs",
   "ResponseFactory.gs",
+  "PersonalMessageService.gs",
   "CheckInService.gs",
   "WebApp.gs",
 ];
@@ -41,6 +42,7 @@ class RangeMock {
     });
     return this;
   }
+  setValue(value) { return this.setValues([[value]]); }
   createTextFinder(searchValue) {
     const range = this;
     let entireCell = false;
@@ -119,6 +121,7 @@ function createHarness() {
       ["MessageID", "Active", "Message", "TrainingType", "Category", "Weight"],
       ["WELCOME", true, "Great work!", "GROUP", "Adult", 1],
     ],
+    _Personal_Messages: [["MessageID", "MemberID", "Active", "Message", "CreatedAt", "UsedAt", "UpdatedAt"]],
     _Logs: [["Timestamp", "Level", "Action", "MemberID", "Message", "RequestID"]],
   };
   const sheets = Object.fromEntries(Object.entries(tables).map(([name, rows]) => [name, new SheetMock(name, rows)]));
@@ -270,6 +273,15 @@ stateFailure.sheets._State.appendRow = originalStateAppend;
 const retryAfterRollback = stateFailure.context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
 assert.equal(retryAfterRollback.result, "success");
 assert.equal(stateFailure.sheets._Raw_Attendance.rows.length, 2, "retry records exactly one attendance event");
+
+const personal = createHarness();
+personal.sheets._Personal_Messages.appendRow(["PM-ONE", "GYM-0001", true, "Welcome back, Ada!", new Date("2026-08-16T10:00:00Z"), "", new Date("2026-08-16T10:00:00Z")]);
+const personalSuccess = personal.context.checkIn_("GYM-0001", { now: new Date("2026-08-17T10:00:00Z") });
+assert.equal(personalSuccess.message, "Welcome back, Ada!", "active personal message overrides the general pool once");
+assert.equal(personal.sheets._Personal_Messages.rows[1][2], false, "personal message becomes inactive after successful check-in");
+assert.equal(personal.sheets._Personal_Messages.rows[1][5].toISOString(), "2026-08-17T10:00:00.000Z", "personal message records UsedAt");
+const laterSession = personal.context.checkIn_("GYM-0001", { now: new Date("2026-08-24T10:00:00Z") });
+assert.equal(laterSession.message, "Great work!", "used personal message is not shown again");
 
 const customizedPresentation = context.createScannerResponse_("success", "attendance_recorded", { trainingName: "Yoga" }, {
   ScannerSuccessSubtitle: "Ready for {trainingName}",

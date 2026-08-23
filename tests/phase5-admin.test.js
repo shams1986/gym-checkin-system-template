@@ -16,16 +16,22 @@ const html = fs.readFileSync(path.join(appsScript, "Admin.html"), "utf8");
 const css = fs.readFileSync(path.join(appsScript, "Admin.css.html"), "utf8");
 const authDocs = ["README.md", "apps-script/README.md", "docs/ADMIN_SETUP.md", "docs/CONFIG.md"].map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 assert.doesNotThrow(() => new vm.Script(client, { filename: "Admin.js" }));
-for (const screen of ["Dashboard", "Members", "Add member", "Edit member", "Schedule", "Settings"]) {
+for (const screen of ["Dashboard", "Members", "Add member", "Edit member", "Schedule", "Personal Messages"]) {
   assert.match(`${html}\n${client}`, new RegExp(screen, "i"));
 }
 assert.doesNotMatch(html, /accounts\.google\.com\/gsi\/client|ADMIN_OAUTH_CLIENT_ID|google-signin/);
 assert.match(html, /includeAdminScript_\("Admin\.js"\)/);
 assert.match(client, /google\.script\.run/);
 assert.match(`${client}\n${bundle}`, /Member ID will be generated automatically/);
-assert.match(client, /Advanced settings are for setup and support only\./);
-assert.match(client, /<details class="advanced-settings">/);
-assert.match(client, /setBusy\(button, "Saving\.\.\."\)/);
+assert.doesNotMatch(html, /data-route="settings"|>Settings<\/button>/);
+assert.match(html, /data-route="personal-messages"/);
+assert.match(client, /button-spinner/);
+assert.match(client, /searchMembersForMessage/);
+assert.match(client, /Search by name or Member ID/);
+assert.match(client, /autocomplete-option/);
+assert.match(client, /Used at/);
+assert.match(client, /deactivatePersonalMessage/);
+assert.match(bundle, /PERSONAL_MESSAGE_SHEET = "_Personal_Messages"/);
 assert.match(client, /Generating PDF\.\.\./);
 assert.match(client, /Generate missing active cards/);
 assert.doesNotMatch(client, /Regenerate active cards/);
@@ -33,7 +39,7 @@ assert.doesNotMatch(client, /<th>Generated<\/th>|<th>Last error<\/th>/);
 assert.match(client, /filters = filters \|\| \{ status: "ACTIVE" \}/);
 assert.match(client, /Applying\.\.\.|Refreshing\.\.\.|Exporting\.\.\./);
 assert.doesNotMatch(client, /querySelector\('button\[type="submit"\]\'\)/);
-assert.match(client, /save\.textContent = "Save"; secondaryAction\.textContent = "Save and generate card"/);
+assert.match(client, /updateBusyText\(clicked, "Generating PDF\.\.\."\)/);
 assert.match(client, /errorPanel\("Schedule could not be loaded", function \(\) \{ renderSchedule\(filters\); \}\)/);
 assert.doesNotMatch(html, /sheet id|cache key|deployment id|callback name/i);
 assert.match(css, /@media\(max-width:600px\)/);
@@ -61,7 +67,7 @@ const properties = {
 };
 let handlerCalls = 0;
 let activeEmail = "";
-const actionNames = ["getAdminSession_", "getDashboardData_", "listMembers_", "getMember_", "getMemberAttendance_", "getAttendance_", "getReportData_", "getMemberFormOptions_", "createMember_", "updateMember_", "setMemberStatus_", "listSchedule_", "createScheduleEntry_", "updateScheduleEntry_", "setScheduleStatus_", "deleteScheduleEntry_", "saveScheduleOrder_", "createTrainingType_", "updateTrainingType_", "deleteTrainingType_", "getAdminSettings_", "updateAdminSettings_", "testCardConfiguration_", "listBasicMessages_", "saveBasicMessage_", "deleteBasicMessage_", "listMemberCards_", "generateMemberCard_", "regenerateMemberCard_", "generateMissingMemberCards_"];
+const actionNames = ["getAdminSession_", "getDashboardData_", "listMembers_", "getMember_", "getMemberAttendance_", "getAttendance_", "getReportData_", "getMemberFormOptions_", "searchMembersForMessage_", "listPersonalMessages_", "savePersonalMessage_", "deactivatePersonalMessage_", "createMember_", "updateMember_", "setMemberStatus_", "listSchedule_", "createScheduleEntry_", "updateScheduleEntry_", "setScheduleStatus_", "deleteScheduleEntry_", "saveScheduleOrder_", "createTrainingType_", "updateTrainingType_", "deleteTrainingType_", "getAdminSettings_", "updateAdminSettings_", "testCardConfiguration_", "listBasicMessages_", "saveBasicMessage_", "deleteBasicMessage_", "listMemberCards_", "generateMemberCard_", "regenerateMemberCard_", "generateMissingMemberCards_"];
 const context = {
   Object,
   Array,
@@ -118,10 +124,11 @@ const serviceContext = {
   boundedInteger_: (value, fallback, minimum, maximum) => { const parsed = Number(value); return Number.isFinite(parsed) ? Math.min(maximum, Math.max(minimum, Math.round(parsed))) : fallback; },
   parseScheduleTime_: (value) => { const match = /^(\d{1,2}):(\d{2})$/.exec(String(value)); if (!match) return null; const minutes = Number(match[1]) * 60 + Number(match[2]); return Number(match[1]) < 24 && Number(match[2]) < 60 ? minutes : null; },
   isRuntimeActive_: (value) => value === true || String(value).toUpperCase() === "ACTIVE" || String(value).toUpperCase() === "TRUE",
+  normalizeMemberId_: (value) => String(value || "").trim().toUpperCase(),
   padRuntimeNumber_: (value) => String(value).padStart(2, "0"),
   TEMPLATE_ENUMS: { dayOfWeek: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] },
   findRuntimeRowByKey_: (sheet, column, key) => sheet === "Training_Types" && column === "TrainingType" && key === "YOGA" ? { TrainingType: "YOGA" } : null,
-  readRuntimeRows_: (sheet) => sheet === "Schedule" ? [{ ScheduleID: "EXISTING", Active: true, DayOfWeek: "MONDAY", StartTime: "10:00", EndTime: "11:00", TrainingType: "YOGA", DisplayName: "Yoga", Audience: "ALL", _rowNumber: 2 }, { ScheduleID: "TARGET", Active: false, DayOfWeek: "MONDAY", StartTime: "10:30", EndTime: "11:30", TrainingType: "YOGA", DisplayName: "Yoga later", Audience: "ALL", _rowNumber: 3 }] : sheet === "Training_Types" ? [{ TrainingType: "YOGA", DisplayName: "Yoga", Active: true, SortOrder: 1 }] : [],
+  readRuntimeRows_: (sheet) => sheet === "Schedule" ? [{ ScheduleID: "EXISTING", Active: true, DayOfWeek: "MONDAY", StartTime: "10:00", EndTime: "11:00", TrainingType: "YOGA", DisplayName: "Yoga", Audience: "ALL", _rowNumber: 2 }, { ScheduleID: "TARGET", Active: false, DayOfWeek: "MONDAY", StartTime: "10:30", EndTime: "11:30", TrainingType: "YOGA", DisplayName: "Yoga later", Audience: "ALL", _rowNumber: 3 }] : sheet === "Training_Types" ? [{ TrainingType: "YOGA", DisplayName: "Yoga", Active: true, SortOrder: 1 }] : sheet === "Members" ? [{ MemberID: "DEMO0001", FirstName: "Jamie", LastName: "Example", Status: "Active" }, { MemberID: "AXIS014", FirstName: "Markus", LastName: "Example", Status: "Active" }] : [],
   Utilities: { formatDate: () => "2026-08-17", getUuid: () => "uuid" },
   getRuntimeSettings_: () => ({ Timezone: "Etc/UTC" }),
   LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock: () => {} }) },
@@ -132,6 +139,7 @@ vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminRepository.gs"), "ut
 vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminMemberService.gs"), "utf8"), serviceContext);
 vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminScheduleService.gs"), "utf8"), serviceContext);
 vm.runInContext(fs.readFileSync(path.join(appsScript, "AdminSettingsService.gs"), "utf8"), serviceContext);
+vm.runInContext(fs.readFileSync(path.join(appsScript, "PersonalMessageService.gs"), "utf8"), serviceContext);
 
 assert.throws(() => serviceContext.validateMemberInput_({ firstName: "", lastName: "" }), (error) => Boolean(error.adminCode === "validation_error" && error.adminFields.firstName && error.adminFields.lastName));
 const memberInput = JSON.parse(JSON.stringify(serviceContext.validateMemberInput_({ firstName: " Ada ", lastName: " Lovelace ", active: true, joinedAt: "2026-08-17" })));
@@ -142,6 +150,8 @@ assert.throws(() => serviceContext.setScheduleStatus_({ scheduleId: "TARGET", ac
 assert.equal(serviceContext.validateAdminSetting_("PrimaryColor", "#a1b2c3"), "#A1B2C3");
 assert.throws(() => serviceContext.validateAdminSetting_("PrimaryColor", "red"), (error) => error.adminCode === "validation_error");
 assert.throws(() => serviceContext.validateAdminSetting_("ScannerURL", "javascript:alert(1)"), (error) => error.adminCode === "validation_error");
+const memberSearch = JSON.parse(JSON.stringify(serviceContext.searchMembersForMessage_({ query: "Mar" })));
+assert.deepEqual(memberSearch.items.map((item) => item.label), ["AXIS014 — Markus Example"]);
 
 const settingValues = { 2: "Old gym", 3: "Old short" };
 const settingsSheet = { getRange: (row) => ({ getValue: () => settingValues[row], setValue: (value) => { if (row === 3 && value === "Fail") throw new Error("injected write failure"); settingValues[row] = value; } }) };

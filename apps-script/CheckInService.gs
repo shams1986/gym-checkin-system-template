@@ -46,7 +46,13 @@ function checkIn_(memberId, requestMeta) {
         return createScannerResponse_("duplicate", "already_checked_in", context, settings);
       }
 
-      var attendance = {
+      try {
+        var personalMessage = findActivePersonalMessage_(normalizedId);
+        if (personalMessage) {
+          consumePersonalMessage_(personalMessage, now);
+          message = { id: String(personalMessage.MessageID), text: String(personalMessage.Message || "") };
+        }
+        var attendance = {
         attendanceId: Utilities.getUuid(),
         timestamp: now,
         memberId: normalizedId,
@@ -61,15 +67,19 @@ function checkIn_(memberId, requestMeta) {
         source: truncateRuntimeText_(requestMeta.source || "scanner", 40),
         createdAt: new Date(),
       };
-      var appendedRow = appendAttendance_(attendance);
-      try {
-        upsertCheckinState_(attendance);
-      } catch (stateError) {
-        rollbackAttendance_(appendedRow, attendance.attendanceId);
-        throw stateError;
+        var appendedRow = appendAttendance_(attendance);
+        try {
+          upsertCheckinState_(attendance);
+        } catch (stateError) {
+          rollbackAttendance_(appendedRow, attendance.attendanceId);
+          throw stateError;
+        }
+        context.message = message.text;
+        return createScannerResponse_("success", "attendance_recorded", context, settings);
+      } catch (writeError) {
+        if (personalMessage) restorePersonalMessage_(personalMessage);
+        throw writeError;
       }
-      context.message = message.text;
-      return createScannerResponse_("success", "attendance_recorded", context, settings);
     } finally {
       lock.releaseLock();
     }
