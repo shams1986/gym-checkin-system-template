@@ -24,6 +24,8 @@ const report = JSON.parse(JSON.stringify(context.getReportData_({ from: "2026-09
 assert.equal(report.totalCheckins, 2); assert.equal(report.uniqueAttendees, 2); assert.equal(report.topAttendees[0].firstName, "Old"); assert.deepEqual(report.trainingTypes.map((item) => item.value), ["BOX", "YOGA"]); assert.equal(report.lowAttendance, undefined);
 const client = fs.readFileSync(path.join(apps, "Admin.js.html"), "utf8"), html = fs.readFileSync(path.join(apps, "Admin.html"), "utf8");
 for (const expected of ["Attendance", "Reports", "Apply filters", "Clear", "Refresh", "Export page CSV", "Top attendance", "All training types", "member-attendance-next", "formatOwnerDate", "formatOwnerTime"]) assert.ok(`${html}\n${client}`.includes(expected));
+for (const label of ["From", "To", "Training type", "Member", "Check-ins per page"]) assert.ok(client.includes(`<span>${label}</span>`));
+assert.match(client, /class="filters attendance-filters"/);
 assert.ok(!client.includes("zero or fewer check-ins"));
 assert.match(client, /\^\[=\+\\-@\]/);
 console.log("Phase 7 attendance timezone, projection, pagination, reports, and UI contract checks passed.");

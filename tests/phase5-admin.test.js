@@ -26,6 +26,10 @@ assert.match(`${client}\n${bundle}`, /Member ID will be generated automatically/
 assert.doesNotMatch(html, /data-route="settings"|>Settings<\/button>/);
 assert.match(html, /data-route="personal-messages"/);
 assert.match(client, /button-spinner/);
+assert.match(html, /\[hidden\]\{display:none!important\}/);
+assert.match(client, /openMemberEditor\(.*button\)/);
+assert.match(client, /setBusy\(triggerButton, "Opening\.\.\."\)/);
+for (const helper of ["Today’s gym overview", "Add and manage members", "View check-ins", "Top attendance by period", "Generate and open member cards", "Manage training sessions", "One-time member check-in messages"]) assert.ok(client.includes(helper));
 assert.match(client, /searchMembersForMessage/);
 assert.match(client, /Search by name or Member ID/);
 assert.match(client, /autocomplete-option/);
