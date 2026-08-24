@@ -26,6 +26,17 @@ assert.match(`${client}\n${bundle}`, /Member ID will be generated automatically/
 assert.doesNotMatch(html, /data-route="settings"|>Settings<\/button>/);
 assert.match(html, /data-route="personal-messages"/);
 assert.match(client, /button-spinner/);
+assert.match(client, /formatOwnerTime[\s\S]*\+ "h"/);
+assert.match(client, /new MutationObserver\(styleTableIdentityColumns\)/);
+assert.match(css, /schedule-delete\.danger:hover/);
+assert.match(css, /\.identity-id/);
+const formatterContext = { String };
+vm.createContext(formatterContext);
+vm.runInContext(client.split("\n").filter((line) => /^  function format(?:DateTime|OwnerDate|OwnerTime)\(/.test(line)).join("\n"), formatterContext);
+assert.equal(formatterContext.formatDateTime("2026-08-23T10:48:37+02:00"), "23.08.2026 10:48h");
+assert.equal(formatterContext.formatDateTime("2026-08-23 10:48:37"), "23.08.2026 10:48h");
+assert.equal(formatterContext.formatOwnerTime("9:05"), "09:05h");
+assert.equal(formatterContext.formatDateTime(""), "—");
 assert.match(html, /\[hidden\]\{display:none!important\}/);
 assert.match(html, /<meta name="viewport" content="width=device-width, initial-scale=1">/);
 assert.match(client, /labelControls\("member-filters", \{ query: "Search members", status: "Member status"/);
